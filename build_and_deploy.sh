@@ -36,7 +36,7 @@ do
     if [[ ${#param_parts[@]} -eq 2 ]]; then
         param_name=${param_parts[0]}
         param_value=${param_parts[1]}
-        declare "$param_name=$param_value"
+        declare "$param_name=$(eval "echo $param_value")"
     fi
 done
 
@@ -52,6 +52,16 @@ check_variable_existence QT_ROOT
 check_variable_existence BUILD_TYPE
 
 rm -rf build CMakeUserPresets.json CMakePresets.json
+
+# Translations
+while IFS= read -r lang
+do
+    ${QT_ROOT}/gcc_64/bin/lupdate ./src/ -ts ./translations/translation_${lang}.ts
+    ${QT_ROOT}/gcc_64/bin/lrelease ./translations/*.ts
+done < "./translations/list.txt"
+mv ./translations/*.qm ./rcc/rcc
+
+# Resources
 ./rcc/rcc.sh
 
 declare -A CONAN_PRESET

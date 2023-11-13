@@ -1,4 +1,7 @@
 <RCC>
   <qresource prefix="/">
+    <file>rcc/book.txt</file>
+    <file>rcc/translation_ru.qm</file>
+    <file>rcc/translation_en.qm</file>
   </qresource>
 </RCC>

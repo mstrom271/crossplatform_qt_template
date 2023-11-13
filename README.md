@@ -1,4 +1,4 @@
-# Crossplatform Qt C++ project template #
+# SpeedRead crossplatform app #
 Tested under android and linux
 
 ## Requirements ##

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.24)
+cmake_minimum_required(VERSION 3.24.2)
 
 project(TEST_PROJECT VERSION 0.1 LANGUAGES CXX)
 
@@ -13,10 +13,10 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(PROJECT_SOURCES
-        src/main.cpp
-        src/myclass.h
-        rcc/rcc.qrc
+file (GLOB PROJECT_SOURCES
+    src/*.h
+    src/*.cpp
+    rcc/rcc.qrc
 )
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED)
@@ -26,13 +26,12 @@ qt_add_executable(${PROJECT_NAME} MANUAL_FINALIZATION ${PROJECT_SOURCES})
 
 target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
 
-
+# pass variables from cmake to our code
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/config.h.in ${CMAKE_CURRENT_SOURCE_DIR}/src/config.h @ONLY)
 if (ANDROID)
     set_target_properties(${PROJECT_NAME} PROPERTIES
         QT_ANDROID_PACKAGE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/build/android/android
     )
-
-    # pass variable to AndroidManifest.xml
     string(REPLACE "." ".a" ANDROID_PROJECT_NAME ${PROJECT_NAME})
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/build/android/android/AndroidManifest.xml.in ${CMAKE_CURRENT_SOURCE_DIR}/build/android/android/AndroidManifest.xml @ONLY)
 endif()
