@@ -1,14 +1,15 @@
 #!/usr/bin/bash
 set -e
+set -x
 
 ##### script invoke examples: #####
 # ./build_and_deploy.sh \
-#     OS=linux \
+#     OS=Linux \
 #     BUILD_TYPE=Debug \
 #     QT_ROOT=~/Qt/6.5.1
 
 # ./build_and_deploy.sh \
-#     OS=android \
+#     OS=Android \
 #     BUILD_TYPE=Debug \
 #     QT_ROOT=~/Qt/6.5.1 \
 #     ANDROID_NDK_ROOT=/opt/android-sdk/ndk/25.1.8937393/ \
@@ -18,14 +19,14 @@ set -e
 
 
 ##### required environment or commandline variables: ######
-# OS=android          # android, linux
-# BUILD_TYPE=Debug    # Debug, Release
+# OS=Android          # Android, Linux
+BUILD_TYPE=Debug    # Debug, Release
 # QT_ROOT=~/Qt/6.5.1
 
 # android specific variables:
 # ANDROID_NDK_ROOT=/opt/android-sdk/ndk/25.1.8937393/
 # API_LEVEL=31
-# ABI=armv8       # armv8, armv7, x86_64, x86
+ABI=x86_64       # armv8, armv7, x86_64, x86
 # ANDROID_DEVICE_ID=$(adb devices | sed -n 2p | awk '{print $1}')
 
 
@@ -53,45 +54,78 @@ check_variable_existence BUILD_TYPE
 
 rm -rf build CMakeUserPresets.json CMakePresets.json
 
+declare -A CONAN_PRESET
+CONAN_PRESET["Debug"]="conan-debug"
+CONAN_PRESET["Release"]="conan-release"
+
+declare -A QT_PATH
+QT_PATH["Linux_x86_64"]=${QT_ROOT}/gcc_64
+QT_PATH["Windows_x86_64"]=${QT_ROOT}/mingw_64
+QT_PATH["Android_armv8"]=${QT_ROOT}/android_arm64_v8a
+QT_PATH["Android_armv7"]=${QT_ROOT}/android_armv7
+QT_PATH["Android_x86_64"]=${QT_ROOT}/android_x86_64
+QT_PATH["Android_x86"]=${QT_ROOT}/android_x86
+
 # Translations
 while IFS= read -r lang
 do
-    ${QT_ROOT}/gcc_64/bin/lupdate ./src/ -ts ./translations/translation_${lang}.ts
-    ${QT_ROOT}/gcc_64/bin/lrelease ./translations/*.ts
+    lang=$(echo "$lang" | tr -d '\r')
+    ${QT_PATH[${OS}_${ABI}]}/bin/lupdate ./src/ -ts ./translations/translation_${lang}.ts
+    ${QT_PATH[${OS}_${ABI}]}/bin/lrelease ./translations/*.ts
 done < "./translations/list.txt"
 mv ./translations/*.qm ./rcc/rcc
 
 # Resources
 ./rcc/rcc.sh
 
-declare -A CONAN_PRESET
-CONAN_PRESET["Debug"]="conan-debug"
-CONAN_PRESET["Release"]="conan-release"
-
 case $OS in
-    "linux")
-        mkdir -p ./build/$BUILD_TYPE
-        conan install . -s build_type=$BUILD_TYPE --build=missing
-        source build/$BUILD_TYPE/generators/conanbuild.sh
-        cmake -S . -B ./build/$BUILD_TYPE --preset ${CONAN_PRESET[$BUILD_TYPE]} \
-            -DQT_PATH=${QT_ROOT}/gcc_64/
-        source build/$BUILD_TYPE/generators/deactivate_conanbuild.sh
+    "Linux")
+        DESTINATION_DIR=./build/$BUILD_TYPE
+        mkdir -p $DESTINATION_DIR
+
+        conan profile detect -f
+        conan install . \
+            -s build_type=$BUILD_TYPE \
+            -c tools.cmake.cmaketoolchain:generator=Ninja \
+            --build=missing
+        source $DESTINATION_DIR/generators/conanbuild.sh
+        cmake -S . \
+            -B $DESTINATION_DIR \
+            --preset ${CONAN_PRESET[$BUILD_TYPE]} \
+            -DQT_PATH=${QT_PATH[${OS}_${ABI}]}
+        cmake --build $DESTINATION_DIR
+        source $DESTINATION_DIR/generators/deactivate_conanbuild.sh
 
         mv CMakeUserPresets.json CMakePresets.json
         ;;
-    "android")
+    "Windows")
+        DESTINATION_DIR=./build/$BUILD_TYPE
+        mkdir -p $DESTINATION_DIR
+
+        conan profile detect -f
+        conan install . \
+            -s build_type=$BUILD_TYPE \
+            -c tools.cmake.cmaketoolchain:generator=Ninja \
+            -c tools.microsoft.bash:subsystem=msys2 \
+            -c tools.microsoft.bash:active=True \
+            --build=missing
+        source $DESTINATION_DIR/generators/conanbuild.sh
+        cmake -S . \
+            -B $DESTINATION_DIR \
+            --preset ${CONAN_PRESET[$BUILD_TYPE]} \
+            -DQT_PATH=${QT_PATH[${OS}_${ABI}]}
+        cmake --build $DESTINATION_DIR
+        source $DESTINATION_DIR/generators/deactivate_conanbuild.sh
+
+        mv CMakeUserPresets.json CMakePresets.json
+        ;;
+    "Android")
         check_variable_existence ANDROID_NDK_ROOT
         check_variable_existence API_LEVEL
         check_variable_existence ABI
 
         mkdir -p build/android
         cp -r android/ build/android
-
-        declare -A QT_PATH
-        QT_PATH["armv8"]=${QT_ROOT}/android_arm64_v8a
-        QT_PATH["armv7"]=${QT_ROOT}/android_armv7
-        QT_PATH["x86_64"]=${QT_ROOT}/android_x86_64
-        QT_PATH["x86"]=${QT_ROOT}/android_x86
 
         declare -A TOOL_NAME
         TOOL_NAME["armv8"]=aarch64-linux-android31-clang
@@ -108,7 +142,7 @@ case $OS in
         conan install . --profile android -s arch=$ABI -s os.api_level=$API_LEVEL -s build_type=$BUILD_TYPE --build=missing
 
         source build/$BUILD_TYPE/generators/conanbuild.sh
-        cmake -S . -B $DESTINATION_DIR --preset ${CONAN_PRESET[$BUILD_TYPE]} -DQT_PATH=${QT_PATH[$ABI]}
+        cmake -S . -B $DESTINATION_DIR --preset ${CONAN_PRESET[$BUILD_TYPE]} -DQT_PATH=${QT_PATH[${OS}_${ABI}]}
         cmake --build $DESTINATION_DIR
         source build/$BUILD_TYPE/generators/deactivate_conanbuild.sh
 

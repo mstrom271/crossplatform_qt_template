@@ -7,14 +7,14 @@ Qt, Android NDK, Conan
 ### Script invoke examples: ###
 ```bash
 ./build_and_deploy.sh \
-    OS=linux \
+    OS=Linux \
     BUILD_TYPE=Debug \
     QT_ROOT=~/Qt/6.5.1
 ```
 
 ```bash
 ./build_and_deploy.sh \
-    OS=android \
+    OS=Android \
     BUILD_TYPE=Debug \
     QT_ROOT=~/Qt/6.5.1 \
     ANDROID_NDK_ROOT=/opt/android-sdk/ndk/25.1.8937393/ \
@@ -25,7 +25,7 @@ Qt, Android NDK, Conan
 
 ### Required environment or commandline variables: ###
 ```bash
-OS=android          # android, linux
+OS=Android          # Android, Linux
 BUILD_TYPE=Debug    # Debug, Release
 QT_ROOT=~/Qt/6.5.1
 ```

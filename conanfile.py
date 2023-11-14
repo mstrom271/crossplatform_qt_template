@@ -12,6 +12,7 @@ class Recipe(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("cmake/3.26.4")
+        self.tool_requires("ninja/1.11.1")
 
     def layout(self):
         cmake_layout(self)
