@@ -19,15 +19,15 @@ set -x
 
 
 ##### required environment or commandline variables: ######
-# OS=Android          # Android, Linux
-# BUILD_TYPE=Debug    # Debug, Release
-# export Qt6_DIR=~/Qt/6.5.1/gcc_64                  # Qt for target platform
+# export OS=Android          # Android, Linux, Windows
+# export BUILD_TYPE=Debug    # Debug, Release
+# export Qt6_DIR=~/Qt/6.5.1/gcc_64  # Qt for target platform
 
 # # android specific variables:
 # export ANDROID_NDK=/opt/android-sdk/ndk/25.1.8937393/
-# API_LEVEL=31
-# ABI=x86_64       # armv8, armv7, x86_64, x86
-# ANDROID_DEVICE_ID=$(adb devices | sed -n 2p | awk '{print $1}')
+# export API_LEVEL=31
+# export ABI=x86_64       # armv8, armv7, x86_64, x86
+# export ANDROID_DEVICE_ID=$(adb devices | sed -n 2p | awk '{print $1}')
 
 
 # Create commandline-based local variables
@@ -125,18 +125,9 @@ case $OS in
         mkdir -p build/android
         cp -r android/ build/android
 
-        # declare -A TOOL_NAME
-        # TOOL_NAME["armv8"]=aarch64-linux-android31-clang
-        # TOOL_NAME["armv7"]=armv7a-linux-androideabi31-clang
-        # TOOL_NAME["x86_64"]=x86_64-linux-android31-clang
-        # TOOL_NAME["x86"]=i686-linux-android31-clang
-
         DESTINATION_DIR=./build/android/$BUILD_TYPE/$ABI
         mkdir -p $DESTINATION_DIR
 
-        # export CC=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/${TOOL_NAME[$ABI]}
-        # export CXX=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/${TOOL_NAME[$ABI]}++
-        # export LD=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/ld
         conan install . \
             -s os=$OS \
             -s arch=$ABI \
