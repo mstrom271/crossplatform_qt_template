@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.24.2)
 
 project(TEST_PROJECT VERSION 0.1 LANGUAGES CXX)
 
-include("${QT_PATH}/lib/cmake/Qt6/qt.toolchain.cmake")
+include("$ENV{Qt6_DIR}/lib/cmake/Qt6/qt.toolchain.cmake")
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 

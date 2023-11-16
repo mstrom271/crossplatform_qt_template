@@ -1,9 +1,62 @@
-name: Releases
+name: Build
 
-on: 
+on:
   push:
 
 jobs:
+  build_android_arm64:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      BUILD_TYPE: Release
+      ABI: armv8
+    steps:
+      - uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r25c
+          local-cache: true
+      - name: Install Host Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          aqtversion: '==3.1.*'
+          version: '6.5.1'
+          host: 'linux'
+          target: 'desktop'
+          arch: 'gcc_64'
+          cache: 'true'
+          cache-key-prefix: 'install-qt-action'
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          aqtversion: '==3.1.*'
+          version: '6.5.1'
+          host: 'linux'
+          target: 'android'
+          arch: 'android_arm64_v8a'
+          cache: 'true'
+          cache-key-prefix: 'install-qt-action'
+      - name: Install Conan
+        id: conan
+        uses: turtlebrowser/get-conan@main
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Build
+        shell: bash
+        run: |
+          ./build.sh OS=Android BUILD_TYPE=${{ env.BUILD_TYPE }} API_LEVEL=31 ABI=armv8
+          mv ./build/android/${{ env.BUILD_TYPE }}/${{ env.ABI }}/android-build/TEST_PROJECT.apk \
+             ./build/android/${{ env.BUILD_TYPE }}/${{ env.ABI }}/android-build/TEST_PROJECT_android_${{ env.ABI }}_${{ env.BUILD_TYPE }}.apk
+          TAG=$(echo ${{ github.ref }} | sed 's/^refs\/tags\///')_android
+          echo "TAG=$TAG" >> $GITHUB_ENV
+      - name: Release
+        uses: ncipollo/release-action@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          artifacts: "./build/android/${{ env.BUILD_TYPE }}/${{ env.ABI }}/android-build/TEST_PROJECT_android_${{ env.ABI }}_${{ env.BUILD_TYPE }}.apk"
+          tag: ${{ env.TAG }}
+
+
   build_windows_x86_64:
     runs-on: windows-latest
     permissions:
@@ -29,7 +82,7 @@ jobs:
       - name: Build
         shell: bash
         run: |
-          ./build_and_deploy.sh OS=Windows BUILD_TYPE=${{ env.BUILD_TYPE }} QT_ROOT=../Qt/6.5.1
+          ./build.sh OS=Windows BUILD_TYPE=${{ env.BUILD_TYPE }}
           mv ./build/${{ env.BUILD_TYPE }}/TEST_PROJECT.exe ./build/${{ env.BUILD_TYPE }}/TEST_PROJECT_win_x86_64_${{ env.BUILD_TYPE }}.exe
           TAG=$(echo ${{ github.ref }} | sed 's/^refs\/tags\///')_windows
           echo "TAG=$TAG" >> $GITHUB_ENV
@@ -66,7 +119,7 @@ jobs:
       - name: Build
         shell: bash
         run: |
-          ./build_and_deploy.sh OS=Linux BUILD_TYPE=${{ env.BUILD_TYPE }} QT_ROOT=../Qt/6.5.1
+          ./build.sh OS=Linux BUILD_TYPE=${{ env.BUILD_TYPE }}
           mv ./build/${{ env.BUILD_TYPE }}/TEST_PROJECT ./build/${{ env.BUILD_TYPE }}/TEST_PROJECT_lin_x86_64_${{ env.BUILD_TYPE }}
           TAG=$(echo ${{ github.ref }} | sed 's/^refs\/tags\///')_linux
           echo "TAG=$TAG" >> $GITHUB_ENV
