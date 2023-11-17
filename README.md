@@ -1,9 +1,8 @@
-# SpeedRead crossplatform app #
+# Crossplatform Qt App template #
 Tested under android, linux, windows
 
 ## Requirements ##
-Qt, Conan
-Android NDK
+Qt, Conan, Android NDK, [linuxdeploy](https://github.com/linuxdeploy/linuxdeploy)
 
 ### Script invoke examples: ###
 ```bash

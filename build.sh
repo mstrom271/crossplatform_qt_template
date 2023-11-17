@@ -2,6 +2,9 @@
 set -e
 set -x
 
+# Read config.ini
+while IFS= read -r line; do line=$(echo "$line" | tr -d '\r'); export "$line"; done < "./config.ini"
+
 ##### script invoke examples: #####
 # ./build.sh \
 #     OS=Linux \
@@ -48,6 +51,8 @@ check_variable_existence() {
     fi
 }
 
+check_variable_existence PROJECT_NAME
+check_variable_existence PROJECT_VERSION
 check_variable_existence OS
 check_variable_existence Qt6_DIR
 check_variable_existence BUILD_TYPE
@@ -95,8 +100,18 @@ case $OS in
             --preset ${CONAN_PRESET[$BUILD_TYPE]}
         cmake --build $DESTINATION_DIR
         source $DESTINATION_DIR/generators/deactivate_conanbuild.sh
-
         mv CMakeUserPresets.json CMakePresets.json
+
+        # Deploy
+        cp ./android/res/drawable/icon.png ./$DESTINATION_DIR/${PROJECT_NAME}.png
+        cd ./$DESTINATION_DIR
+        linuxdeploy-x86_64.AppImage \
+            --appdir ./${PROJECT_NAME}.dir \
+            --executable ./${PROJECT_NAME} \
+            --icon-file ./${PROJECT_NAME}.png \
+            --create-desktop-file \
+            --output appimage \
+            --plugin qt
         ;;
     "Windows")
         DESTINATION_DIR=./build/$BUILD_TYPE
@@ -114,8 +129,14 @@ case $OS in
             --preset ${CONAN_PRESET[$BUILD_TYPE]}
         cmake --build $DESTINATION_DIR
         source $DESTINATION_DIR/generators/deactivate_conanbuild.sh
-
         mv CMakeUserPresets.json CMakePresets.json
+
+        # Deploy
+        mkdir $DESTINATION_DIR/${PROJECT_NAME}/
+        cp $DESTINATION_DIR/${PROJECT_NAME}.exe $DESTINATION_DIR/${PROJECT_NAME}/
+        windeployqt $DESTINATION_DIR/${PROJECT_NAME}/${PROJECT_NAME}.exe
+        tar -cjvf $DESTINATION_DIR/${PROJECT_NAME}.tar.bz2 $DESTINATION_DIR/${PROJECT_NAME}
+        ls -al $DESTINATION_DIR/
         ;;
     "Android")
         check_variable_existence ANDROID_NDK
