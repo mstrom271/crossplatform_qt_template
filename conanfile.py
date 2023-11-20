@@ -15,4 +15,7 @@ class Recipe(ConanFile):
         self.tool_requires("ninja/1.11.1")
 
     def layout(self):
-        cmake_layout(self)
+        # cmake_layout(self)
+        self.folders.source = "."
+        self.folders.build = "."
+        self.folders.generators = "./generators"

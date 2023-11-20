@@ -29,7 +29,7 @@ while IFS= read -r line; do line=$(echo "$line" | tr -d '\r'); export "$line"; d
 # # android specific variables:
 # export ANDROID_NDK=/opt/android-sdk/ndk/25.1.8937393/
 # export API_LEVEL=31
-# export ABI=x86_64       # armv8, armv7, x86_64, x86
+export ABI=x86_64       # armv8, armv7, x86_64, x86
 # export ANDROID_DEVICE_ID=$(adb devices | sed -n 2p | awk '{print $1}')
 
 
@@ -51,13 +51,16 @@ check_variable_existence() {
     fi
 }
 
+check_variable_existence Qt6_DIR
 check_variable_existence PROJECT_NAME
 check_variable_existence PROJECT_VERSION
 check_variable_existence OS
-check_variable_existence Qt6_DIR
+check_variable_existence ABI
 check_variable_existence BUILD_TYPE
 
-rm -rf build CMakeUserPresets.json CMakePresets.json
+rm -rf build CMakePresets.json CMakeUserPresets.json
+DESTINATION_DIR=./build/$OS/$ABI/$BUILD_TYPE
+mkdir -p $DESTINATION_DIR
 
 declare -A CONAN_PRESET
 CONAN_PRESET["Debug"]="conan-debug"
@@ -84,23 +87,24 @@ mv ./translations/*.qm ./rcc/rcc
 # Resources
 ./rcc/rcc.sh
 
+
 conan profile detect -f
 case $OS in
     "Linux")
-        DESTINATION_DIR=./build/$BUILD_TYPE
-        mkdir -p $DESTINATION_DIR
-
+        # Config
         conan install . \
             -s build_type=$BUILD_TYPE \
             -c tools.cmake.cmaketoolchain:generator=Ninja \
-            --build=missing
+            --build=missing \
+            --output-folder=$DESTINATION_DIR
         source $DESTINATION_DIR/generators/conanbuild.sh
         cmake -S . \
             -B $DESTINATION_DIR \
             --preset ${CONAN_PRESET[$BUILD_TYPE]}
-        cmake --build $DESTINATION_DIR
         source $DESTINATION_DIR/generators/deactivate_conanbuild.sh
-        mv CMakeUserPresets.json CMakePresets.json
+
+        # Build
+        cmake --build $DESTINATION_DIR
 
         # Deploy
         cp ./android/res/drawable/icon.png ./$DESTINATION_DIR/${PROJECT_NAME}.png
@@ -114,22 +118,22 @@ case $OS in
             --plugin qt
         ;;
     "Windows")
-        DESTINATION_DIR=./build/$BUILD_TYPE
-        mkdir -p $DESTINATION_DIR
-
+        # Config
         conan install . \
             -s build_type=$BUILD_TYPE \
             -c tools.cmake.cmaketoolchain:generator=Ninja \
             -c tools.microsoft.bash:subsystem=msys2 \
             -c tools.microsoft.bash:active=True \
-            --build=missing
+            --build=missing \
+            --output-folder=$DESTINATION_DIR
         source $DESTINATION_DIR/generators/conanbuild.sh
         cmake -S . \
             -B $DESTINATION_DIR \
             --preset ${CONAN_PRESET[$BUILD_TYPE]}
-        cmake --build $DESTINATION_DIR
         source $DESTINATION_DIR/generators/deactivate_conanbuild.sh
-        mv CMakeUserPresets.json CMakePresets.json
+
+        # Build
+        cmake --build $DESTINATION_DIR
 
         # Deploy
         mkdir $DESTINATION_DIR/${PROJECT_NAME}/
@@ -141,14 +145,8 @@ case $OS in
     "Android")
         check_variable_existence ANDROID_NDK
         check_variable_existence API_LEVEL
-        check_variable_existence ABI
 
-        mkdir -p build/android
-        cp -r android/ build/android
-
-        DESTINATION_DIR=./build/android/$BUILD_TYPE/$ABI
-        mkdir -p $DESTINATION_DIR
-
+        # Config
         conan install . \
             -s os=$OS \
             -s arch=$ABI \
@@ -158,15 +156,18 @@ case $OS in
             -s os.api_level=$API_LEVEL \
             -s build_type=$BUILD_TYPE \
             -c tools.android:ndk_path=$ANDROID_NDK \
-            --build=missing
+            --build=missing \
+            --output-folder=$DESTINATION_DIR
+        source $DESTINATION_DIR/generators/conanbuild.sh
+        cmake -S . \
+            -B $DESTINATION_DIR \
+            --preset ${CONAN_PRESET[$BUILD_TYPE]}
+        source $DESTINATION_DIR/generators/deactivate_conanbuild.sh
 
-        source build/$BUILD_TYPE/generators/conanbuild.sh
-        cmake -S . -B $DESTINATION_DIR --preset ${CONAN_PRESET[$BUILD_TYPE]}
+        # Build
         cmake --build $DESTINATION_DIR
-        source build/$BUILD_TYPE/generators/deactivate_conanbuild.sh
 
-        rm CMakeUserPresets.json
-
+        # Deploy
         if [ -n "$ANDROID_DEVICE_ID" ]; then
             adb devices -l
             adb -s $ANDROID_DEVICE_ID install $DESTINATION_DIR/android-build/*.apk
