@@ -2,35 +2,7 @@
 set -e
 set -x
 
-##### script invoke examples: #####
-# ./build.sh \
-#     OS=Linux \
-#     BUILD_TYPE=Debug \
-#     Qt6_DIR=~/Qt/6.5.1/gcc_64
-
-# ./build.sh \
-#     OS=Android \
-#     BUILD_TYPE=Debug \
-#     Qt6_DIR=~/Qt/6.5.1/android_arm64_v8a \
-#     ANDROID_NDK=/opt/android-sdk/ndk/25.1.8937393/ \
-#     API_LEVEL=31 \
-#     ABI=armv8 \
-#     ANDROID_DEVICE_ID=28ff7904
-
-
-##### required environment or commandline variables: ######
-# export STAGE=Build          # Config, Build, Deploy. If not specified, all three stages are implied
-
-# export OS=Android          # Android, Linux, Windows
-# export BUILD_TYPE=Debug    # Debug, Release
-# export Qt6_DIR=~/Qt/6.5.1/gcc_64  # Qt for target platform
-
-# # android specific variables:
-# export ANDROID_NDK=/opt/android-sdk/ndk/25.1.8937393/
-# export API_LEVEL=31
-export ABI=x86_64       # armv8, armv7, x86_64, x86
-# export ANDROID_DEVICE_ID=$(adb devices | sed -n 2p | awk '{print $1}')
-
+export ABI=x86_64
 
 # Create variables from commandline params
 for param in "$@"
@@ -82,6 +54,7 @@ if ! [[ -n "$STAGE" ]] || [[ "$STAGE" == "Config" ]]; then
         "Linux")
             conan install . \
                 -s build_type=$BUILD_TYPE \
+                -s compiler.cppstd=20 \
                 -c tools.cmake.cmaketoolchain:generator=Ninja \
                 --build=missing \
                 --output-folder=$DESTINATION_DIR
@@ -94,6 +67,7 @@ if ! [[ -n "$STAGE" ]] || [[ "$STAGE" == "Config" ]]; then
         "Windows")
             conan install . \
                 -s build_type=$BUILD_TYPE \
+                -s compiler.cppstd=20 \
                 -c tools.cmake.cmaketoolchain:generator=Ninja \
                 -c tools.microsoft.bash:subsystem=msys2 \
                 -c tools.microsoft.bash:active=True \
@@ -111,11 +85,12 @@ if ! [[ -n "$STAGE" ]] || [[ "$STAGE" == "Config" ]]; then
             conan install . \
                 -s os=$OS \
                 -s arch=$ABI \
+                -s build_type=$BUILD_TYPE \
+                -s os.api_level=$API_LEVEL \
                 -s compiler=clang \
                 -s compiler.version=14 \
+                -s compiler.cppstd=20 \
                 -c tools.cmake.cmaketoolchain:generator=Ninja \
-                -s os.api_level=$API_LEVEL \
-                -s build_type=$BUILD_TYPE \
                 -c tools.android:ndk_path=$ANDROID_NDK \
                 --build=missing \
                 --output-folder=$DESTINATION_DIR
