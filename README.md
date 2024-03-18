@@ -1,5 +1,6 @@
 # Crossplatform Qt App template #
-Tested under android, linux, windows
+This template is designed to make it easy to start developing a cross-platform application. To customize your own project, you just need to correct config.ini, set the listed environment variables and add a code to the src directory.
+Tested under android, linux, windows.
 
 ## Requirements ##
 Qt, Conan, Android NDK, [linuxdeploy](https://github.com/linuxdeploy/linuxdeploy)
@@ -7,35 +8,43 @@ Qt, Conan, Android NDK, [linuxdeploy](https://github.com/linuxdeploy/linuxdeploy
 ### Script invoke examples: ###
 ```bash
 ./build.sh \
+    Qt6_DIR=/opt/Qt/6.6.2/gcc_64 \
     OS=Linux \
-    BUILD_TYPE=Debug \
-    Qt6_DIR=~/Qt/6.5.1/gcc_64
+    ABI=x86_64 \
+    BUILD_TYPE=Release \
+    STAGE=All
 ```
 
 ```bash
 ./build.sh \
+    JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64/ \
+    ANDROID_SDK_ROOT=/opt/android-sdk/ \
+    ANDROID_NDK=/opt/android-sdk/ndk/26.2.11394342 \
+    Qt6_DIR=/opt/Qt/6.6.2/android_arm64_v8a \
+    API_LEVEL=33 \
+    ANDROID_DEVICE_ID=28ff7904 \
     OS=Android \
-    BUILD_TYPE=Debug \
-    Qt6_DIR=~/Qt/6.5.1/android_arm64_v8a \
-    ANDROID_NDK=/opt/android-sdk/ndk/25.1.8937393/ \
-    API_LEVEL=31 \
     ABI=armv8 \
-    ANDROID_DEVICE_ID=28ff7904
+    BUILD_TYPE=Debug \
+    STAGE=All
 ```
 
 ### Required environment or commandline variables: ###
 ```bash
-export STAGE=Build          # Config, Build, Deploy. If not specified, all three stages are implied
+Qt6_DIR=/opt/Qt/6.6.2/gcc_64     # Qt for target platform
 
-export OS=Android          # Android, Linux, Windows
-export BUILD_TYPE=Debug    # Debug, Release
-export Qt6_DIR=~/Qt/6.5.1/android_arm64_v8a  # Qt for target platform
+OS=Linux             # Android, Linux, Windows
+ABI=x86_64           # armv8, armv7, x86_64, x86
+BUILD_TYPE=Debug     # Debug, Release
+STAGE=All            # Config, Build, Deploy, All
 ```
 
 ```bash
 # android specific variables:
-export ANDROID_NDK=/opt/android-sdk/ndk/25.1.8937393/
-export API_LEVEL=31
-export ABI=armv8       # armv8, armv7, x86_64, x86
-export ANDROID_DEVICE_ID=$(adb devices | sed -n 2p | awk '{print $1}')
+JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64/
+ANDROID_SDK_ROOT=/opt/android-sdk/
+ANDROID_NDK=/opt/android-sdk/ndk/26.2.11394342
+
+API_LEVEL=33
+ANDROID_DEVICE_ID=$(adb devices | sed -n 2p | awk '{print $1}')
 ```
