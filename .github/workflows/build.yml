@@ -9,12 +9,13 @@ jobs:
     permissions:
       contents: write
     env:
-      BUILD_TYPE: Release
+      BUILD_TYPE: Debug
       ABI: armv8
     steps:
       - uses: nttld/setup-ndk@v1
         with:
           ndk-version: r26c
+          add-to-path: true
           local-cache: true
       - name: Install Host Qt
         uses: jurplel/install-qt-action@v3
@@ -58,7 +59,7 @@ jobs:
           TAG=$(echo ${{ github.ref }} | sed 's/^refs\/tags\///')_android
           echo "TAG=$TAG" >> $GITHUB_ENV
           echo "FINAL_NAME=$FINAL_NAME" >> $GITHUB_ENV
-      - name: Release
+      - name: Debug
         uses: ncipollo/release-action@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
@@ -71,7 +72,7 @@ jobs:
     permissions:
       contents: write
     env:
-      BUILD_TYPE: Release
+      BUILD_TYPE: Debug
     steps:
       - name: Install Qt
         uses: jurplel/install-qt-action@v3
@@ -104,7 +105,7 @@ jobs:
           TAG=$(echo ${{ github.ref }} | sed 's/^refs\/tags\///')_windows
           echo "TAG=$TAG" >> $GITHUB_ENV
           echo "FINAL_NAME=$FINAL_NAME" >> $GITHUB_ENV
-      - name: Release
+      - name: Debug
         uses: ncipollo/release-action@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
@@ -117,7 +118,7 @@ jobs:
     permissions:
       contents: write
     env:
-      BUILD_TYPE: Release
+      BUILD_TYPE: Debug
     steps:
       - name: Install Qt
         uses: jurplel/install-qt-action@v3
@@ -156,7 +157,7 @@ jobs:
           TAG=$(echo ${{ github.ref }} | sed 's/^refs\/tags\///')_linux
           echo "TAG=$TAG" >> $GITHUB_ENV
           echo "FINAL_NAME=$FINAL_NAME" >> $GITHUB_ENV
-      - name: Release
+      - name: Debug
         uses: ncipollo/release-action@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:

@@ -22,7 +22,7 @@ Qt, Conan, Android NDK, [linuxdeploy](https://github.com/linuxdeploy/linuxdeploy
     ANDROID_NDK=/opt/android-sdk/ndk/26.2.11394342 \
     Qt6_DIR=/opt/Qt/6.6.2/android_arm64_v8a \
     API_LEVEL=33 \
-    ANDROID_DEVICE_ID=28ff7904 \
+    ANDROID_DEVICE=28ff7904 \
     OS=Android \
     ABI=armv8 \
     BUILD_TYPE=Debug \
@@ -46,5 +46,6 @@ ANDROID_SDK_ROOT=/opt/android-sdk/
 ANDROID_NDK=/opt/android-sdk/ndk/26.2.11394342
 
 API_LEVEL=33
-ANDROID_DEVICE_ID=$(adb devices | sed -n 2p | awk '{print $1}')
+ANDROID_DEVICE=28ff7904 # or 192.168.1.38:5555
+ANDROID_KEYSTORE=/path/to/sign.keystore
 ```

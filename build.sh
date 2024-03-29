@@ -114,6 +114,7 @@ if [[ "$STAGE" == "All" ]] || [[ "$STAGE" == "Config" ]]; then
             source $DESTINATION_DIR/generators/deactivate_conanbuild.sh
             ;;
     esac
+    mv -f $DESTINATION_DIR/compile_commands.json ./build/
 fi
 
 # Build
@@ -144,9 +145,14 @@ if [[ "$STAGE" == "All" ]] || [[ "$STAGE" == "Deploy" ]]; then
             ls -al $DESTINATION_DIR/
             ;;
         "Android")
-            if [ -n "$ANDROID_DEVICE_ID" ]; then
-                adb devices -l
-                adb -s $ANDROID_DEVICE_ID install $DESTINATION_DIR/android-build/*.apk
+            if [[ "$BUILD_TYPE" == "Release" ]]; then
+                check_variable_existence ANDROID_KEYSTORE
+                apksigner sign --ks $ANDROID_KEYSTORE --out \
+                    $DESTINATION_DIR/android-build/${PROJECT_NAME}.apk \
+                    $DESTINATION_DIR/android-build/${PROJECT_NAME}.apk
+            fi
+            if [ -n "$ANDROID_DEVICE" ]; then
+                adb -s $ANDROID_DEVICE install $DESTINATION_DIR/android-build/${PROJECT_NAME}.apk
             fi
             ;;
     esac
