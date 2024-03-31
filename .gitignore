@@ -3,7 +3,6 @@
 /build/
 /rcc/rcc.qrc
 /rcc/rcc/translation_*
-/src/config.h
 CMakePresets.json
 CMakeUserPresets.json
 config.sh

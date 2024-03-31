@@ -5,6 +5,8 @@
 
 int main(int argc, char **argv) {
     QApplication app(argc, argv);
+    QApplication::setOrganizationName(ORGANIZATION_NAME);
+    QApplication::setApplicationName(PROJECT_NAME);
 
     qDebug() << Settings::getLanguage();
     qDebug() << Settings::getTheme();

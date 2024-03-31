@@ -46,7 +46,7 @@ jobs:
         shell: bash
         run: |
           env && echo "-----------------------------"
-          while IFS= read -r line; do line=$(echo "$line" | tr -d '\r'); export "$line"; done < "./config.ini"
+          source config.h.sh
           export OS=Android
           export ABI=${{ env.ABI }}
           export BUILD_TYPE=${{ env.BUILD_TYPE }}
@@ -93,7 +93,7 @@ jobs:
         shell: bash
         run: |
           env && echo "-----------------------------"
-          while IFS= read -r line; do line=$(echo "$line" | tr -d '\r'); export "$line"; done < "./config.ini"
+          source config.h.sh
           export OS=Windows
           export ABI=x86_64
           export BUILD_TYPE=${{ env.BUILD_TYPE }}
@@ -145,7 +145,7 @@ jobs:
         shell: bash
         run: |
           env && echo "-----------------------------"
-          while IFS= read -r line; do line=$(echo "$line" | tr -d '\r'); export "$line"; done < "./config.ini"
+          source config.h.sh
           export OS=Linux
           export ABI=x86_64
           export BUILD_TYPE=${{ env.BUILD_TYPE }}

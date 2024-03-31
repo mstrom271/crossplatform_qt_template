@@ -21,9 +21,6 @@ QFont deserializeFontFromByteArray(QByteArray byteArray) {
 }
 
 Settings::Settings() {
-    QApplication::setOrganizationName(ORGANIZATION_NAME);
-    QApplication::setApplicationName(PROJECT_NAME);
-
     FirstRun = settings.value("/FirstRun", true).toBool();
     if (FirstRun)
         settings.setValue("/FirstRun", false);

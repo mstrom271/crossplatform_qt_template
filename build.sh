@@ -32,8 +32,8 @@ else
     export QT_HOST_PATH=$Qt6_DIR
 fi
 
-# Read variables from config.ini
-while IFS= read -r line; do line=$(echo "$line" | tr -d '\r'); export "$line"; done < "./config.ini"
+# Read variables from src/config.h
+source config.h.sh
 check_variable_existence PROJECT_NAME
 check_variable_existence PROJECT_VERSION
 
