@@ -26,4 +26,4 @@ done
 echo "  </qresource>" >> "$output_file"
 echo "</RCC>" >> "$output_file"
 
-echo "Файл $output_file создан."
+echo "$output_file created"

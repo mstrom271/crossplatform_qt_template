@@ -1,8 +1,10 @@
 /.vscode/
+/android/AndroidManifest.xml
 /build/
 /rcc/rcc.qrc
 /rcc/rcc/translation_*
 /src/config.h
-config.sh
-CMakeUserPresets.json
 CMakePresets.json
+CMakeUserPresets.json
+config.sh
+*exclude*
