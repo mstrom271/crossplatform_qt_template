@@ -1,5 +1,4 @@
 #include "language.h"
-#include "settings.h"
 #include <QApplication>
 #include <QWidget>
 

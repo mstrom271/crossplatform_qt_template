@@ -1,5 +1,4 @@
 #include "theme.h"
-#include "settings.h"
 #include <QApplication>
 #include <QStringList>
 #include <QWidget>
@@ -21,13 +20,13 @@ void Theme::notifyAll() {
 
 // load theme
 void Theme::applyTheme(QString theme) {
-    if (Settings::getTheme() == "dark") {
+    if (theme == "dark") {
         Theme::setColor(Background, Qt::black);
         Theme::setColor(Text, Qt::white);
-    } else if (Settings::getTheme() == "grey") {
+    } else if (theme == "grey") {
         Theme::setColor(Background, Qt::gray);
         Theme::setColor(Text, Qt::black);
-    } else if (Settings::getTheme() == "light") {
+    } else if (theme == "light") {
         Theme::setColor(Background, Qt::lightGray);
         Theme::setColor(Text, Qt::black);
     }
@@ -73,7 +72,14 @@ void Theme::applyTheme(QString theme) {
 }
 
 // TODO:
-QString Theme::getSystemTheme() { return correct("dark"); }
+QString Theme::getSystemTheme() {
+    QPalette palette = QApplication::palette();
+    QColor windowColor = palette.color(QPalette::Window);
+    if (windowColor.value() < 128)
+        return correct("dark");
+    else
+        return correct("light");
+}
 
 // check if theme is allowed. Return default, if theme is incorrect
 QString Theme::correct(QString theme) {

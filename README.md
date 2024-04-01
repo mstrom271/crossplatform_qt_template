@@ -1,5 +1,5 @@
 # Crossplatform Qt App template #
-This template is designed to make it easy to start developing a cross-platform application. To customize your own project, you just need to correct config.ini, set the listed environment variables and add a code to the src directory.
+This template is designed to make it easy to start developing a cross-platform application. To customize your own project, you just need to correct src/config.h, set the listed environment variables and add a code to the src directory.
 Tested under android, linux, windows.
 
 ## Requirements ##
