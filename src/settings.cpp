@@ -1,7 +1,5 @@
 #include "settings.h"
 #include "config.h"
-#include "language.h"
-#include "theme.h"
 #include <QApplication>
 #include <QDataStream>
 #include <QIODevice>
@@ -21,20 +19,14 @@ QFont deserializeFontFromByteArray(QByteArray byteArray) {
 }
 
 Settings::Settings() {
+    settings.setValue("/Version", PROJECT_VERSION);
+
     FirstRun = settings.value("/FirstRun", true).toBool();
     if (FirstRun)
         settings.setValue("/FirstRun", false);
 
-    if (FirstRun)
-        Language = Language::getSystemLanguage();
-    else
-        Language =
-            settings.value("/Language", Language::correct("en")).toString();
-
-    if (FirstRun)
-        Theme = Theme::getSystemTheme();
-    else
-        Theme = settings.value("/Theme", Theme::correct("dark")).toString();
+    Language = settings.value("/Language", "System").toString();
+    Theme = settings.value("/Theme", "System").toString();
 
     Param1 = settings.value("/Param1", 0).toUInt();
     Param2 = settings.value("/Param2", false).toBool();

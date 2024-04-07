@@ -20,8 +20,10 @@ class Language {
   public:
     static Language &getInstance();
 
-    static void applyLanguage(QString lang);
+    static void applyLanguage();
     static QString getSystemLanguage();
+    static QString getEffectiveLanguage();
     static void notifyAll();
+    static QStringList getLanguageList();
     static QString correct(QString language);
 };

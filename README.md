@@ -47,5 +47,5 @@ ANDROID_NDK=/opt/android-sdk/ndk/26.2.11394342
 
 API_LEVEL=33
 ANDROID_DEVICE=28ff7904 # or 192.168.1.38:5555
-ANDROID_KEYSTORE=/path/to/sign.keystore
+ANDROID_KEYSTORE_FILE=/path/to/sign.keystore
 ```

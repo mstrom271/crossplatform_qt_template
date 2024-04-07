@@ -5,5 +5,4 @@
 /rcc/rcc/translation_*
 CMakePresets.json
 CMakeUserPresets.json
-config.sh
 *exclude*

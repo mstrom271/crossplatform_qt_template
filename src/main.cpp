@@ -1,6 +1,5 @@
-
+#include "config.h"
 #include "myclass.h"
-#include "settings.h"
 #include <QApplication>
 
 int main(int argc, char **argv) {

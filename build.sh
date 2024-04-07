@@ -44,7 +44,7 @@ mkdir -p $DESTINATION_DIR
 while IFS= read -r lang
 do
     lang=$(echo "$lang" | tr -d '\r')
-    ${QT_HOST_PATH}/bin/lupdate ./src/ -ts ./translations/translation_${lang}.ts
+    ${QT_HOST_PATH}/bin/lupdate ./src/ -ts ./translations/translation_${lang}.ts #-no-obsolete
     ${QT_HOST_PATH}/bin/lrelease ./translations/*.ts
 done < "./translations/list.txt"
 mkdir -p ./rcc/rcc
@@ -146,9 +146,11 @@ if [[ "$STAGE" == "All" ]] || [[ "$STAGE" == "Deploy" ]]; then
             ;;
         "Android")
             if [[ "$BUILD_TYPE" == "Release" ]]; then
-                check_variable_existence ANDROID_KEYSTORE
-                apksigner sign --ks $ANDROID_KEYSTORE --out \
-                    $DESTINATION_DIR/android-build/${PROJECT_NAME}.apk \
+                check_variable_existence ANDROID_KEYSTORE_FILE
+                check_variable_existence ANDROID_KEYSTORE_PASS
+                apksigner sign \
+                    --ks $ANDROID_KEYSTORE_FILE \
+                    --ks-pass pass:$ANDROID_KEYSTORE_PASS \
                     $DESTINATION_DIR/android-build/${PROJECT_NAME}.apk
             fi
             if [ -n "$ANDROID_DEVICE" ]; then

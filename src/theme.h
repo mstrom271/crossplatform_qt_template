@@ -1,8 +1,6 @@
 #pragma once
 
-#include <QColor>
 #include <QEvent>
-#include <QMap>
 
 class ThemeChangeEvent : public QEvent {
   public:
@@ -19,22 +17,10 @@ class Theme {
   public:
     static Theme &getInstance();
 
-    static void applyTheme(QString theme);
+    static void applyTheme();
     static QString getSystemTheme();
+    static QString getEffectiveTheme();
     static void notifyAll();
+    static QStringList getThemeList();
     static QString correct(QString theme);
-
-    enum ColorRole {
-        TransparentText,
-        Text,
-        Background,
-        Control,
-        ControlStart,
-        ControlStop
-    };
-    static void setColor(ColorRole colorRole, QColor color);
-    static QColor getColor(ColorRole colorRole);
-
-  private:
-    QMap<ColorRole, QColor> colorMap;
 };

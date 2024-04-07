@@ -1,4 +1,5 @@
 #include "language.h"
+#include "settings.h"
 #include <QApplication>
 #include <QWidget>
 
@@ -18,15 +19,18 @@ void Language::notifyAll() {
 }
 
 // load translation for relative language
-void Language::applyLanguage(QString lang) {
-    bool isOk = Language::getInstance().translator.load(":rcc/translation_" +
-                                                        correct(lang) + ".qm");
+void Language::applyLanguage() {
+    bool isOk = Language::getInstance().translator.load(
+        ":rcc/translation_" + Language::getEffectiveLanguage() + ".qm");
     if (isOk)
         QApplication::instance()->installTranslator(
             &Language::getInstance().translator);
+
+    Language::notifyAll();
 }
 
 QString Language::getSystemLanguage() {
+    // TODO: multilingual support
     QString lang;
     switch (QLocale::system().language()) {
     case QLocale::Russian:
@@ -40,12 +44,24 @@ QString Language::getSystemLanguage() {
         break;
     }
 
-    return correct(lang);
+    return lang;
 }
+
+// sustitutes System language for a real one
+QString Language::getEffectiveLanguage() {
+    QString lang = Settings::getLanguage();
+    lang = Language::correct(lang);
+    if (lang == "System")
+        return Language::getSystemLanguage();
+    return lang;
+}
+
+QStringList Language::getLanguageList() { return {"System", "en", "ru"}; }
 
 // check if lang is allowed. Return default, if lang is incorrect
 QString Language::correct(QString lang) {
-    if (lang != "ru" && lang != "en")
-        lang = "en";
+    QStringList langAllowed = getLanguageList();
+    if (!langAllowed.contains(lang))
+        return langAllowed.front();
     return lang;
 }

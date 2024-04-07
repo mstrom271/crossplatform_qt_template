@@ -32,6 +32,8 @@ if (ANDROID)
         QT_ANDROID_PACKAGE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/android)
 
     string(REPLACE "." ".a" ANDROID_PROJECT_NAME ${PROJECT_NAME})
+    set(BUILD_NUMBER $ENV{BUILD_NUMBER})
+    set(ANDROID_PROJECT_NAME $ENV{ANDROID_PROJECT_NAME})
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/android/AndroidManifest.xml.in ${CMAKE_CURRENT_SOURCE_DIR}/android/AndroidManifest.xml @ONLY)
 endif()
 
