@@ -68,7 +68,75 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: android-artifact
+          name: android_arm64-artifact
+          path: "./build/${{ env.OS }}/${{ env.ABI }}/${{ env.BUILD_TYPE }}/android-build/${{ env.FINAL_NAME }}"
+
+
+  build_android_x86_64:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r26c
+          add-to-path: true
+          local-cache: true
+      - name: Install Host Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          aqtversion: '==3.1.*'
+          version: '6.6.2'
+          host: 'linux'
+          target: 'desktop'
+          arch: 'gcc_64'
+          cache: 'true'
+          cache-key-prefix: 'install-qt-action'
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          aqtversion: '==3.1.*'
+          version: '6.6.2'
+          host: 'linux'
+          target: 'android'
+          arch: 'android_x86_64'
+          cache: 'true'
+          cache-key-prefix: 'install-qt-action'
+      - name: Install Conan
+        id: conan
+        uses: turtlebrowser/get-conan@main
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Build
+        shell: bash
+        env:
+          ANDROID_KEYSTORE: ${{ secrets.ANDROID_KEYSTORE }}
+          ANDROID_KEYSTORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASS }}
+        run: |
+          env && echo "-----------------------------"
+          source config.h.sh
+          export OS=Android
+          export ABI=x86_64
+          export BUILD_TYPE=Release
+          export STAGE=All
+          export API_LEVEL=33
+          echo "${ANDROID_KEYSTORE}" | base64 --decode > /tmp/android_release.keystore
+          export ANDROID_KEYSTORE_FILE=/tmp/android_release.keystore
+          export ANDROID_KEYSTORE_PASS="${ANDROID_KEYSTORE_PASS}"
+          sudo apt-get update && sudo apt-get install -y apksigner
+          ./build.sh
+          export ANDROID_KEYSTORE=""
+          export ANDROID_KEYSTORE_PASS=""
+
+          export FINAL_NAME=${PROJECT_NAME}_${PROJECT_VERSION}_${OS}_${ABI}.apk
+          mv ./build/${OS}/${ABI}/${BUILD_TYPE}/android-build/${PROJECT_NAME}.apk \
+             ./build/${OS}/${ABI}/${BUILD_TYPE}/android-build/${FINAL_NAME}
+
+          printenv >> ${GITHUB_ENV}
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android_x86_64-artifact
           path: "./build/${{ env.OS }}/${{ env.ABI }}/${{ env.BUILD_TYPE }}/android-build/${{ env.FINAL_NAME }}"
 
 
@@ -111,9 +179,8 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: windows-artifact
+          name: windows_x86_64-artifact
           path: "./build/${{ env.OS }}/${{ env.ABI }}/${{ env.BUILD_TYPE }}/${{ env.FINAL_NAME }}"
-
 
 
   build_linux_x86_64:
@@ -161,30 +228,35 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: linux-artifact
+          name: linux_x86_64-artifact
           path: "./build/${{ env.OS }}/${{ env.ABI }}/${{ env.BUILD_TYPE }}/${{ env.FINAL_NAME }}"
 
 
   collect_artifacts:
-    needs: [build_android_arm64, build_windows_x86_64, build_linux_x86_64]
+    needs: [build_android_arm64, build_android_x86_64, build_windows_x86_64, build_linux_x86_64]
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
-      - name: Download artifacts android
+      - name: Download artifacts android_arm64
         uses: actions/download-artifact@v4
         with:
-          name: android-artifact
+          name: android_arm64-artifact
+          path: ./artifact
+      - name: Download artifacts android_x86_64
+        uses: actions/download-artifact@v4
+        with:
+          name: android_x86_64-artifact
           path: ./artifact
       - name: Download artifacts windows
         uses: actions/download-artifact@v4
         with:
-          name: windows-artifact
+          name: windows_x86_64-artifact
           path: ./artifact
       - name: Download artifacts linux
         uses: actions/download-artifact@v4
         with:
-          name: linux-artifact
+          name: linux_x86_64-artifact
           path: ./artifact
       - name: Prepare
         shell: bash
