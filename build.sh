@@ -33,6 +33,7 @@ else
 fi
 
 # Read variables from src/config.h
+./build_number.sh
 source config.h.sh
 check_variable_existence PROJECT_NAME
 check_variable_existence PROJECT_VERSION
