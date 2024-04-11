@@ -44,27 +44,37 @@ jobs:
         env:
           ANDROID_KEYSTORE: ${{ secrets.ANDROID_KEYSTORE }}
           ANDROID_KEYSTORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASS }}
+          ANDROID_KEYALIAS: ${{ secrets.ANDROID_KEYALIAS }}
+          ANDROID_KEYALIAS_PASS: ${{ secrets.ANDROID_KEYALIAS_PASS }}
         run: |
           env && echo "-----------------------------"
+
+          set +x
+          echo "$ANDROID_KEYSTORE" | base64 --decode > /tmp/android_release.keystore
+          export ANDROID_KEYSTORE_FILE=/tmp/android_release.keystore
+          export ANDROID_KEYSTORE_PASS="$ANDROID_KEYSTORE_PASS"
+          export ANDROID_KEYALIAS="$ANDROID_KEYALIAS"
+          export ANDROID_KEYALIAS_PASS="$ANDROID_KEYALIAS_PASS"
+          set -x
+
           export OS=Android
           export ABI=armv8
           export BUILD_TYPE=Release
           export STAGE=All
           export API_LEVEL=33
-          echo "${ANDROID_KEYSTORE}" | base64 --decode > /tmp/android_release.keystore
-          export ANDROID_KEYSTORE_FILE=/tmp/android_release.keystore
-          export ANDROID_KEYSTORE_PASS="${ANDROID_KEYSTORE_PASS}"
           sudo apt-get update && sudo apt-get install -y apksigner
           ./build.sh
           source config.h.sh
           export ANDROID_KEYSTORE=""
           export ANDROID_KEYSTORE_PASS=""
+          export ANDROID_KEYALIAS=""
+          export ANDROID_KEYALIAS_PASS=""
 
           export FINAL_NAME=${PROJECT_NAME}_${PROJECT_VERSION}_${OS}_${ABI}.apk
-          mv ./build/${OS}/${ABI}/${BUILD_TYPE}/android-build/${PROJECT_NAME}.apk \
-             ./build/${OS}/${ABI}/${BUILD_TYPE}/android-build/${FINAL_NAME}
+          mv ./build/$OS/$ABI/$BUILD_TYPE/android-build/$PROJECT_NAME.apk \
+             ./build/$OS/$ABI/$BUILD_TYPE/android-build/$FINAL_NAME
 
-          printenv >> ${GITHUB_ENV}
+          printenv >> $GITHUB_ENV
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
@@ -112,28 +122,38 @@ jobs:
         env:
           ANDROID_KEYSTORE: ${{ secrets.ANDROID_KEYSTORE }}
           ANDROID_KEYSTORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASS }}
+          ANDROID_KEYALIAS: ${{ secrets.ANDROID_KEYALIAS }}
+          ANDROID_KEYALIAS_PASS: ${{ secrets.ANDROID_KEYALIAS_PASS }}
         run: |
           env && echo "-----------------------------"
+
+          set +x
+          echo "$ANDROID_KEYSTORE" | base64 --decode > /tmp/android_release.keystore
+          export ANDROID_KEYSTORE_FILE=/tmp/android_release.keystore
+          export ANDROID_KEYSTORE_PASS="$ANDROID_KEYSTORE_PASS"
+          export ANDROID_KEYALIAS="$ANDROID_KEYALIAS"
+          export ANDROID_KEYALIAS_PASS="$ANDROID_KEYALIAS_PASS"
+          set -x
+
           export OS=Android
           export ABI=x86_64
           export BUILD_TYPE=Release
           export STAGE=All
           export API_LEVEL=33
-          echo "${ANDROID_KEYSTORE}" | base64 --decode > /tmp/android_release.keystore
-          export ANDROID_KEYSTORE_FILE=/tmp/android_release.keystore
-          export ANDROID_KEYSTORE_PASS="${ANDROID_KEYSTORE_PASS}"
           sudo apt-get update && sudo apt-get install -y apksigner
           ./build_number.sh # hack for Google Play to get different VERSION_CODE
           ./build.sh
           source config.h.sh
           export ANDROID_KEYSTORE=""
           export ANDROID_KEYSTORE_PASS=""
+          export ANDROID_KEYALIAS=""
+          export ANDROID_KEYALIAS_PASS=""
 
           export FINAL_NAME=${PROJECT_NAME}_${PROJECT_VERSION}_${OS}_${ABI}.apk
-          mv ./build/${OS}/${ABI}/${BUILD_TYPE}/android-build/${PROJECT_NAME}.apk \
-             ./build/${OS}/${ABI}/${BUILD_TYPE}/android-build/${FINAL_NAME}
+          mv ./build/$OS/$ABI/$BUILD_TYPE/android-build/$PROJECT_NAME.apk \
+             ./build/$OS/$ABI/$BUILD_TYPE/android-build/$FINAL_NAME
 
-          printenv >> ${GITHUB_ENV}
+          printenv >> $GITHUB_ENV
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
@@ -173,10 +193,10 @@ jobs:
           source config.h.sh
 
           export FINAL_NAME=${PROJECT_NAME}_${PROJECT_VERSION}_${OS}_${ABI}.tar.bz2
-          mv ./build/${OS}/${ABI}/${BUILD_TYPE}/${PROJECT_NAME}.tar.bz2 \
-             ./build/${OS}/${ABI}/${BUILD_TYPE}/${FINAL_NAME}
+          mv ./build/$OS/$ABI/$BUILD_TYPE/$PROJECT_NAME.tar.bz2 \
+             ./build/$OS/$ABI/$BUILD_TYPE/$FINAL_NAME
 
-          printenv >> ${GITHUB_ENV}
+          printenv >> $GITHUB_ENV
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
@@ -222,10 +242,10 @@ jobs:
           source config.h.sh
 
           export FINAL_NAME=${PROJECT_NAME}_${PROJECT_VERSION}_${OS}_${ABI}.AppImage
-          mv ./build/${OS}/${ABI}/${BUILD_TYPE}/${PROJECT_NAME}-${ABI}.AppImage \
-             ./build/${OS}/${ABI}/${BUILD_TYPE}/${FINAL_NAME}
+          mv ./build/$OS/$ABI/$BUILD_TYPE/$PROJECT_NAME-$ABI.AppImage \
+             ./build/$OS/$ABI/$BUILD_TYPE/$FINAL_NAME
 
-          printenv >> ${GITHUB_ENV}
+          printenv >> $GITHUB_ENV
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:

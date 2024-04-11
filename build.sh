@@ -6,15 +6,15 @@ set -x
 for param in "$@"
 do
     IFS='=' read -r -a param_parts <<< "$param"
-    if [[ ${#param_parts[@]} -eq 2 ]]; then
-        param_name=${param_parts[0]}
-        param_value=${param_parts[1]}
+    if [[ $#param_parts[@] -eq 2 ]]; then
+        param_name=$param_parts[0]
+        param_value=$param_parts[1]
         declare -x "$param_name=$(eval "echo $param_value")"
     fi
 done
 
 check_variable_existence() {
-    if [[ -z ${!1} ]]; then
+    if [[ -z $!1 ]]; then
         echo "Please define $1 variable"
         exit
     fi
@@ -27,7 +27,7 @@ check_variable_existence BUILD_TYPE
 check_variable_existence STAGE
 
 if [ "$OS" == "Android" ]; then
-    export QT_HOST_PATH=${Qt6_DIR}/../gcc_64
+    export QT_HOST_PATH=$Qt6_DIR/../gcc_64
 else
     export QT_HOST_PATH=$Qt6_DIR
 fi
@@ -45,8 +45,8 @@ mkdir -p $DESTINATION_DIR
 while IFS= read -r lang
 do
     lang=$(echo "$lang" | tr -d '\r')
-    ${QT_HOST_PATH}/bin/lupdate ./src/ -ts ./translations/translation_${lang}.ts #-no-obsolete
-    ${QT_HOST_PATH}/bin/lrelease ./translations/*.ts
+    $QT_HOST_PATH/bin/lupdate ./src/ -ts ./translations/translation_$lang.ts #-no-obsolete
+    $QT_HOST_PATH/bin/lrelease ./translations/*.ts
 done < "./translations/list.txt"
 mkdir -p ./rcc/rcc
 mv ./translations/*.qm ./rcc/rcc
@@ -127,35 +127,64 @@ fi
 if [[ "$STAGE" == "All" ]] || [[ "$STAGE" == "Deploy" ]]; then
     case $OS in
         "Linux")
-            cp ./android/res/drawable/icon.png ./$DESTINATION_DIR/${PROJECT_NAME}.png
+            cp ./android/res/drawable/icon.png ./$DESTINATION_DIR/$PROJECT_NAME.png
             cd ./$DESTINATION_DIR
-            export QMAKE=${Qt6_DIR}/bin/qmake
+            export QMAKE=$Qt6_DIR/bin/qmake
             linuxdeploy-x86_64.AppImage \
-                --appdir ./${PROJECT_NAME}.dir \
-                --executable ./${PROJECT_NAME} \
-                --icon-file ./${PROJECT_NAME}.png \
+                --appdir ./$PROJECT_NAME.dir \
+                --executable ./$PROJECT_NAME \
+                --icon-file ./$PROJECT_NAME.png \
                 --create-desktop-file \
                 --output appimage \
                 --plugin qt
             ;;
         "Windows")
-            mkdir $DESTINATION_DIR/${PROJECT_NAME}/
-            cp $DESTINATION_DIR/${PROJECT_NAME}.exe $DESTINATION_DIR/${PROJECT_NAME}/
-            windeployqt $DESTINATION_DIR/${PROJECT_NAME}/${PROJECT_NAME}.exe
-            tar -cjvf $DESTINATION_DIR/${PROJECT_NAME}.tar.bz2 $DESTINATION_DIR/${PROJECT_NAME}
+            mkdir $DESTINATION_DIR/$PROJECT_NAME/
+            cp $DESTINATION_DIR/$PROJECT_NAME.exe $DESTINATION_DIR/$PROJECT_NAME/
+            windeployqt $DESTINATION_DIR/$PROJECT_NAME/$PROJECT_NAME.exe
+            tar -cjvf $DESTINATION_DIR/$PROJECT_NAME.tar.bz2 $DESTINATION_DIR/$PROJECT_NAME
             ls -al $DESTINATION_DIR/
             ;;
         "Android")
-            if [[ "$BUILD_TYPE" == "Release" ]]; then
+            set +x
+                if [ ! -n "$ANDROID_KEYSTORE_FILE" ]; then
+                    export ANDROID_KEYSTORE_FILE=~/.android/debug.keystore
+                    export ANDROID_KEYSTORE_PASS="android"
+                    export ANDROID_KEYALIAS=androiddebugkey
+                    export ANDROID_KEYALIAS_PASS="android"
+                fi
                 check_variable_existence ANDROID_KEYSTORE_FILE
                 check_variable_existence ANDROID_KEYSTORE_PASS
+                check_variable_existence ANDROID_KEYALIAS
+                check_variable_existence ANDROID_KEYALIAS_PASS
+
+                # Apk sign
                 apksigner sign \
                     --ks $ANDROID_KEYSTORE_FILE \
                     --ks-pass pass:$ANDROID_KEYSTORE_PASS \
-                    $DESTINATION_DIR/android-build/${PROJECT_NAME}.apk
-            fi
+                    --ks-key-alias $ANDROID_KEYALIAS \
+                    --key-pass pass:$ANDROID_KEYALIAS_PASS \
+                    $DESTINATION_DIR/android-build/$PROJECT_NAME.apk
+
+                # Android App Bundle create and sign
+                if [[ "$BUILD_TYPE" == "Release" ]]; then
+                    androiddeployqt \
+                        --input $DESTINATION_DIR/android-$PROJECT_NAME-deployment-settings.json \
+                        --output $DESTINATION_DIR/android-build/ \
+                        --aab \
+                        --sign $ANDROID_KEYSTORE_FILE $ANDROID_KEYALIAS \
+                        --storepass $ANDROID_KEYSTORE_PASS \
+                        --keypass $ANDROID_KEYALIAS_PASS
+                    jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 \
+                        $DESTINATION_DIR/android-build/build/outputs/bundle/release/android-build-release.aab \
+                        -keystore $ANDROID_KEYSTORE_FILE \
+                        -storepass $ANDROID_KEYSTORE_PASS $ANDROID_KEYALIAS \
+                        -keypass $ANDROID_KEYALIAS_PASS
+                fi
+            set -x
+
             if [ -n "$ANDROID_DEVICE" ]; then
-                adb -s $ANDROID_DEVICE install $DESTINATION_DIR/android-build/${PROJECT_NAME}.apk
+                adb -s $ANDROID_DEVICE install $DESTINATION_DIR/android-build/$PROJECT_NAME.apk
             fi
             ;;
     esac
