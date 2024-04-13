@@ -5,7 +5,7 @@
 
 Language::Language() {}
 
-Language &Language::getInstance() {
+Language &Language::instance() {
     static Language instance;
     return instance;
 }
@@ -20,13 +20,12 @@ void Language::notifyAll() {
 
 // load translation for relative language
 void Language::applyLanguage() {
-    bool isOk = Language::getInstance().translator.load(
-        ":rcc/translation_" + Language::getEffectiveLanguage() + ".qm");
+    bool isOk = instance().translator.load(":rcc/translation_" +
+                                           getEffectiveLanguage() + ".qm");
     if (isOk)
-        QApplication::instance()->installTranslator(
-            &Language::getInstance().translator);
+        QApplication::instance()->installTranslator(&instance().translator);
 
-    Language::notifyAll();
+    notifyAll();
 }
 
 QString Language::getSystemLanguage() {
@@ -50,9 +49,9 @@ QString Language::getSystemLanguage() {
 // sustitutes System language for a real one
 QString Language::getEffectiveLanguage() {
     QString lang = Settings::getLanguage();
-    lang = Language::correct(lang);
+    lang = correct(lang);
     if (lang == "System")
-        return Language::getSystemLanguage();
+        return getSystemLanguage();
     return lang;
 }
 

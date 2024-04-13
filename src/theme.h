@@ -15,7 +15,7 @@ class Theme {
     Theme &operator=(const Theme &other) = delete;
 
   public:
-    static Theme &getInstance();
+    static Theme &instance();
 
     static void applyTheme();
     static QString getSystemTheme();

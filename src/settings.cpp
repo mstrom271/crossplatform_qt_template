@@ -38,39 +38,39 @@ Settings::Settings() {
             .toByteArray());
 }
 
-Settings &Settings::getInstance() {
+Settings &Settings::instance() {
     static Settings instance;
     return instance;
 }
 
-bool Settings::getFirstRun() { return Settings::getInstance().FirstRun; }
+bool Settings::getFirstRun() { return instance().FirstRun; }
 
-QString Settings::getLanguage() { return Settings::getInstance().Language; }
+QString Settings::getLanguage() { return instance().Language; }
 void Settings::setLanguage(QString newLanguage) {
-    Settings::getInstance().settings.setValue("/Language", newLanguage);
-    Settings::getInstance().Language = newLanguage;
+    instance().settings.setValue("/Language", newLanguage);
+    instance().Language = newLanguage;
 };
 
-QString Settings::getTheme() { return Settings::getInstance().Theme; }
+QString Settings::getTheme() { return instance().Theme; }
 void Settings::setTheme(QString newTheme) {
-    Settings::getInstance().settings.setValue("/Theme", newTheme);
-    Settings::getInstance().Theme = newTheme;
+    instance().settings.setValue("/Theme", newTheme);
+    instance().Theme = newTheme;
 };
 
-uint Settings::getParam1() { return Settings::getInstance().Param1; }
+uint Settings::getParam1() { return instance().Param1; }
 void Settings::setParam1(uint newParam1) {
-    Settings::getInstance().settings.setValue("/Param1", newParam1);
-    Settings::getInstance().Param1 = newParam1;
+    instance().settings.setValue("/Param1", newParam1);
+    instance().Param1 = newParam1;
 };
 
-bool Settings::getParam2() { return Settings::getInstance().Param2; }
+bool Settings::getParam2() { return instance().Param2; }
 void Settings::setParam2(bool newParam2) {
-    Settings::getInstance().settings.setValue("/Param2", newParam2);
-    Settings::getInstance().Param2 = newParam2;
+    instance().settings.setValue("/Param2", newParam2);
+    instance().Param2 = newParam2;
 };
 
-QFont Settings::getMainFont() { return Settings::getInstance().MainFont; }
+QFont Settings::getMainFont() { return instance().MainFont; }
 void Settings::setMainFont(QFont newMainFont) {
-    Settings::getInstance().settings.setValue("/MainFont", newMainFont);
-    Settings::getInstance().MainFont = newMainFont;
+    instance().settings.setValue("/MainFont", newMainFont);
+    instance().MainFont = newMainFont;
 };

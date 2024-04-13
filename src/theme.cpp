@@ -6,7 +6,7 @@
 
 Theme::Theme() {}
 
-Theme &Theme::getInstance() {
+Theme &Theme::instance() {
     static Theme instance;
     return instance;
 }
@@ -23,7 +23,7 @@ void Theme::applyTheme() {
     // QString style;
     // static_cast<QApplication
     // *>(QApplication::instance())->setStyleSheet(style);
-    Theme::notifyAll();
+    notifyAll();
 }
 
 QString Theme::getSystemTheme() {
@@ -38,10 +38,10 @@ QString Theme::getSystemTheme() {
 // sustitutes System theme for a real one
 QString Theme::getEffectiveTheme() {
     QString theme = Settings::getTheme();
-    theme = Theme::correct(theme);
+    theme = correct(theme);
     if (theme == "System") {
-        qDebug() << Theme::getSystemTheme();
-        return Theme::getSystemTheme();
+        qDebug() << getSystemTheme();
+        return getSystemTheme();
     }
     qDebug() << theme;
     return theme;

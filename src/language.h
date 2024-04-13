@@ -18,7 +18,7 @@ class Language {
     Language &operator=(const Language &other) = delete;
 
   public:
-    static Language &getInstance();
+    static Language &instance();
 
     static void applyLanguage();
     static QString getSystemLanguage();

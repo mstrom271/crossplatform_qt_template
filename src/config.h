@@ -7,6 +7,6 @@
 #define PROJECT_VERSION_MAJOR "0"
 #define PROJECT_VERSION_MINOR "1"
 #define ORGANIZATION_NAME "ORGANIZATION_TEMPLATE"
-#define BUILD_NUMBER 15
+#define BUILD_NUMBER 17
 #define ANDROID_PROJECT_NAME "org.myproject.example.PROJECT_TEMPLATE"
 // clang-format on

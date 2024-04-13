@@ -18,7 +18,7 @@ class Settings {
     Settings &operator=(const Settings &) = delete;
 
   public:
-    static Settings &getInstance();
+    static Settings &instance();
 
     static bool getFirstRun();
 
