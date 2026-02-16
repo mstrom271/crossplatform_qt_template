@@ -1,40 +1,46 @@
 cmake_minimum_required(VERSION 3.24.2)
 
-project($ENV{PROJECT_NAME} VERSION $ENV{PROJECT_VERSION} LANGUAGES CXX)
+# add variables to cache
+set(PROJECT_NAME "$ENV{PROJECT_NAME}" CACHE STRING "Application name")
+set(PROJECT_VERSION "$ENV{PROJECT_VERSION}" CACHE STRING "Application version")
+set(BUILD_NUMBER "$ENV{BUILD_NUMBER}" CACHE STRING "BUILD_NUMBER")
+set(ANDROID_SDK_ROOT "$ENV{ANDROID_SDK_ROOT}" CACHE STRING "ANDROID_SDK_ROOT")
+set(ANDROID_NDK "$ENV{ANDROID_NDK}" CACHE STRING "ANDROID_NDK")
+set(ANDROID_PROJECT_NAME "$ENV{ANDROID_PROJECT_NAME}" CACHE STRING "ANDROID_PROJECT_NAME")
 
-include("$ENV{Qt6_DIR}/lib/cmake/Qt6/qt.toolchain.cmake")
-
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+project("${PROJECT_NAME}" VERSION "${PROJECT_VERSION}" LANGUAGES CXX)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+find_package(Qt6 REQUIRED COMPONENTS Widgets)
 
-file (GLOB PROJECT_SOURCES
-    src/*.h
-    src/*.cpp
-    rcc/rcc.qrc
+file(GLOB PROJECT_SOURCES CONFIGURE_DEPENDS
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/rcc/rcc.qrc"
 )
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
+qt_add_executable("${PROJECT_NAME}"
+    MANUAL_FINALIZATION
+    "${PROJECT_SOURCES}"
+)
 
-qt_add_executable(${PROJECT_NAME} MANUAL_FINALIZATION ${PROJECT_SOURCES})
+target_compile_features("${PROJECT_NAME}" PRIVATE cxx_std_20)
+target_link_libraries("${PROJECT_NAME}" PRIVATE Qt6::Widgets)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+if(MSVC)
+    target_compile_options("${PROJECT_NAME}" PRIVATE /W4)
+else()
+    target_compile_options("${PROJECT_NAME}" PRIVATE -Wall -Wextra -Wpedantic)
+endif()
 
 if (ANDROID)
     set_target_properties(${PROJECT_NAME} PROPERTIES
         QT_ANDROID_PACKAGE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/android)
 
-    set(BUILD_NUMBER $ENV{BUILD_NUMBER})
-    set(ANDROID_PROJECT_NAME $ENV{ANDROID_PROJECT_NAME})
-    set(PROJECT_LABEL $ENV{PROJECT_LABEL})
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/android/AndroidManifest.xml.in ${CMAKE_CURRENT_SOURCE_DIR}/android/AndroidManifest.xml @ONLY)
 endif()
 
-qt_finalize_executable(${PROJECT_NAME})
+qt_finalize_executable("${PROJECT_NAME}")

@@ -19,6 +19,8 @@ QFont deserializeFontFromByteArray(QByteArray byteArray) {
 }
 
 Settings::Settings() {
+    upgradeOldSettings();
+
     settings.setValue("/Version", PROJECT_VERSION);
 
     FirstRun = settings.value("/FirstRun", true).toBool();
@@ -28,19 +30,23 @@ Settings::Settings() {
     Language = settings.value("/Language", "System").toString();
     Theme = settings.value("/Theme", "System").toString();
 
-    Param1 = settings.value("/Param1", 0).toUInt();
-    Param2 = settings.value("/Param2", false).toBool();
-
-    MainFont = deserializeFontFromByteArray(
+    Font = deserializeFontFromByteArray(
         settings
-            .value("/MainFont",
+            .value("/Font",
                    serializeFontToByteArray(QFont("Arial", 20, QFont::Normal)))
             .toByteArray());
+
+    Param1 = settings.value("/Param1", 0).toUInt();
+    Param2 = settings.value("/Param2", false).toBool();
 }
 
 Settings &Settings::instance() {
     static Settings instance;
     return instance;
+}
+
+void Settings::upgradeOldSettings() {
+    // evaluate from 0.1 to 0.2
 }
 
 bool Settings::getFirstRun() { return instance().FirstRun; }
@@ -57,6 +63,12 @@ void Settings::setTheme(QString newTheme) {
     instance().Theme = newTheme;
 };
 
+QFont Settings::getFont() { return instance().Font; }
+void Settings::setFont(QFont newFont) {
+    instance().settings.setValue("/Font", newFont);
+    instance().Font = newFont;
+};
+
 uint Settings::getParam1() { return instance().Param1; }
 void Settings::setParam1(uint newParam1) {
     instance().settings.setValue("/Param1", newParam1);
@@ -67,10 +79,4 @@ bool Settings::getParam2() { return instance().Param2; }
 void Settings::setParam2(bool newParam2) {
     instance().settings.setValue("/Param2", newParam2);
     instance().Param2 = newParam2;
-};
-
-QFont Settings::getMainFont() { return instance().MainFont; }
-void Settings::setMainFont(QFont newMainFont) {
-    instance().settings.setValue("/MainFont", newMainFont);
-    instance().MainFont = newMainFont;
 };

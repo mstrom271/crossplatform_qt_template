@@ -9,13 +9,14 @@ class Settings {
     bool FirstRun;
     QString Language;
     QString Theme;
+    QFont Font;
     uint Param1;
     bool Param2;
-    QFont MainFont;
 
     Settings();
     Settings(const Settings &) = delete;
     Settings &operator=(const Settings &) = delete;
+    void upgradeOldSettings();
 
   public:
     static Settings &instance();
@@ -28,12 +29,12 @@ class Settings {
     static QString getTheme();
     static void setTheme(QString newTheme);
 
+    static QFont getFont();
+    static void setFont(QFont newFont);
+
     static uint getParam1();
     static void setParam1(uint newParam1);
 
     static bool getParam2();
     static void setParam2(bool newParam2);
-
-    static QFont getMainFont();
-    static void setMainFont(QFont newMainFont);
 };

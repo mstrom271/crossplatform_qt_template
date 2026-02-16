@@ -1,6 +1,9 @@
 #!/bin/bash
 
-FILE="src/config.h"
+# root dir of the project
+PROJECT_DIR=$(realpath "$(dirname "$0")/..")
+
+FILE="$PROJECT_DIR/src/config.h"
 
 # increament BUILD_NUMBER
 CURRENT_VALUE=$(awk "/BUILD_NUMBER/{print \$3}" "$FILE")

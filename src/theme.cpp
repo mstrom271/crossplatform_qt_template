@@ -35,15 +35,13 @@ QString Theme::getSystemTheme() {
         return "LightTheme";
 }
 
-// sustitutes System theme for a real one
+// substitutes System theme for a real one
 QString Theme::getEffectiveTheme() {
     QString theme = Settings::getTheme();
     theme = correct(theme);
     if (theme == "System") {
-        qDebug() << getSystemTheme();
         return getSystemTheme();
     }
-    qDebug() << theme;
     return theme;
 }
 
