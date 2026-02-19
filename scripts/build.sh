@@ -95,37 +95,30 @@ fi
 if [[ "$STAGE" == "All" || "$STAGE" == "Deploy" ]]; then
     case $OS in
         "Linux")
-            # cp $PROJECT_DIR/android/res/drawable/icon.png $BUILD_DIR/$PROJECT_NAME.png
-            # export QMAKE=$QT_HOST_PATH/bin/qmake
-            # cd $BUILD_DIR
-            # linuxdeploy-x86_64.AppImage \
-            #     --appdir ./$PROJECT_NAME.AppDir \
-            #     --executable ./$PROJECT_NAME \
-            #     --icon-file ./$PROJECT_NAME.png \
-            #     --exclude-library "libqtiff.so*" \
-            #     --create-desktop-file \
-            #     --output appimage \
-            #     --plugin qt
-            # rm -rf ./$PROJECT_NAME.AppDir ./${PROJECT_NAME}-x86_64.AppImage
-
-            # linuxdeploy-x86_64.AppImage \
-            #     --appdir ./$PROJECT_NAME.AppDir \
-            #     --executable ./$PROJECT_NAME \
-            #     --icon-file ./$PROJECT_NAME.png \
-            #     --create-desktop-file
-
-            # linuxdeploy-plugin-qt-x86_64.AppImage \
-            #     --appdir ./$PROJECT_NAME.AppDir \
-            #     --exclude-library "libqtiff.so*"
-
-            # linuxdeploy-x86_64.AppImage \
-            #     --appdir ./$PROJECT_NAME.AppDir \
-            #     --output appimage
-
-            # cd $BUILD_DIR
+            # deb + tar.gz
             cmake --install $BUILD_DIR --prefix $BUILD_DIR/install_dir
             cpack --config "$BUILD_DIR/CPackConfig.cmake" -B "$BUILD_DIR"
 
+            # AppImage
+            export QMAKE=$QT_HOST_PATH/bin/qmake
+            cp $PROJECT_DIR/android/res/drawable/icon.png $BUILD_DIR/$PROJECT_NAME.png
+            cd $BUILD_DIR
+                rm -rf ./$PROJECT_NAME.AppDir ./${PROJECT_NAME}-x86_64.AppImage
+
+                linuxdeploy-x86_64.AppImage \
+                    --appdir ./$PROJECT_NAME.AppDir \
+                    --executable ./$PROJECT_NAME \
+                    --icon-file ./$PROJECT_NAME.png \
+                    --create-desktop-file
+
+                linuxdeploy-plugin-qt-x86_64.AppImage \
+                    --appdir ./$PROJECT_NAME.AppDir \
+                    --exclude-library "libqtiff.so*"
+
+                linuxdeploy-x86_64.AppImage \
+                    --appdir ./$PROJECT_NAME.AppDir \
+                    --output appimage
+            cd -
             ;;
 
         # "Windows")
