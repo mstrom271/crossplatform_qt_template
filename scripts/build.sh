@@ -28,15 +28,6 @@ CMAKE_PRESET="${OS,,}-${ABI,,}-${BUILD_TYPE,,}"
 
 # Translations
 $PROJECT_DIR/scripts/translations.sh
-# # Translations
-# while IFS= read -r lang
-# do
-#     lang=$(echo "$lang" | tr -d '\r')
-#     $QT_HOST_PATH/bin/lupdate $PROJECT_DIR/src/ -ts $PROJECT_DIR/translations/translation_$lang.ts #-no-obsolete
-#     $QT_HOST_PATH/bin/lrelease $PROJECT_DIR/translations/*.ts
-# done < "$PROJECT_DIR/translations/list.txt"
-# mkdir -p $PROJECT_DIR/rcc/rcc
-# mv $PROJECT_DIR/translations/*.qm $PROJECT_DIR/rcc/rcc
 
 # Resources
 $PROJECT_DIR/rcc/rcc.sh
@@ -107,15 +98,14 @@ if [[ "$STAGE" == "All" || "$STAGE" == "Deploy" ]]; then
             # cp $PROJECT_DIR/android/res/drawable/icon.png $BUILD_DIR/$PROJECT_NAME.png
             # export QMAKE=$QT_HOST_PATH/bin/qmake
             # cd $BUILD_DIR
-            # # linuxdeploy-x86_64.AppImage \
-            # #     --appdir ./$PROJECT_NAME.AppDir \
-            # #     --executable ./$PROJECT_NAME \
-            # #     --icon-file ./$PROJECT_NAME.png \
-            # #     --exclude-library "libqtiff.so*" \
-            # #     --create-desktop-file \
-            # #     --output appimage \
-            # #     --plugin qt
-            # # ;;
+            # linuxdeploy-x86_64.AppImage \
+            #     --appdir ./$PROJECT_NAME.AppDir \
+            #     --executable ./$PROJECT_NAME \
+            #     --icon-file ./$PROJECT_NAME.png \
+            #     --exclude-library "libqtiff.so*" \
+            #     --create-desktop-file \
+            #     --output appimage \
+            #     --plugin qt
             # rm -rf ./$PROJECT_NAME.AppDir ./${PROJECT_NAME}-x86_64.AppImage
 
             # linuxdeploy-x86_64.AppImage \
@@ -134,8 +124,7 @@ if [[ "$STAGE" == "All" || "$STAGE" == "Deploy" ]]; then
 
             # cd $BUILD_DIR
             cmake --install $BUILD_DIR --prefix $BUILD_DIR/install_dir
-            cd $BUILD_DIR
-            cpack
+            cpack --config "$BUILD_DIR/CPackConfig.cmake" -B "$BUILD_DIR"
 
             ;;
 
