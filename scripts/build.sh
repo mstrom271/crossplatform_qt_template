@@ -61,30 +61,30 @@ if [[ "$STAGE" == "All" || "$STAGE" == "Config" ]]; then
                 --preset $CMAKE_PRESET
             ;;
         "Windows")
-            # conan install $PROJECT_DIR \
-            #     -s build_type=$BUILD_TYPE \
-            #     -s compiler.cppstd=20 \
-            #     -c tools.cmake.cmaketoolchain:generator=Ninja \
-            #     -c tools.microsoft.bash:subsystem=msys2 \
-            #     -c tools.microsoft.bash:active=True \
-            #     --build=missing \
-            #     --output-folder=$BUILD_DIR
-            # source $BUILD_DIR/generators/conanbuild.sh
-            # cmake -S $PROJECT_DIR \
-            #     -B $BUILD_DIR \
-            #     --preset ${CONAN_PRESET[$BUILD_TYPE]}
-            # source $BUILD_DIR/generators/deactivate_conanbuild.sh
+            conan install $PROJECT_DIR \
+                -s os=$OS \
+                -s arch=$ABI \
+                -s build_type=$BUILD_TYPE \
+                -s compiler.cppstd=20 \
+                -c tools.cmake.cmaketoolchain:generator=Ninja \
+                -c tools.microsoft.bash:subsystem=msys2 \
+                -c tools.microsoft.bash:active=True \
+                --build=missing \
+                --output-folder=$BUILD_DIR
+            cmake -S $PROJECT_DIR \
+                -B $BUILD_DIR \
+                --preset $CMAKE_PRESET
             ;;
         "Android")
             conan install $PROJECT_DIR \
                 -s os=$OS \
                 -s arch=$ABI \
                 -s build_type=$BUILD_TYPE \
-                -s os.api_level=$API_LEVEL \
-                -s compiler=clang \
-                -s compiler.version=14 \
                 -s compiler.cppstd=20 \
                 -c tools.cmake.cmaketoolchain:generator=Ninja \
+                -s compiler=clang \
+                -s compiler.version=14 \
+                -s os.api_level=$API_LEVEL \
                 -c tools.android:ndk_path=$ANDROID_NDK \
                 --build=missing \
                 --output-folder=$BUILD_DIR
@@ -101,64 +101,88 @@ if [[ "$STAGE" == "All" || "$STAGE" == "Build" ]]; then
 fi
 
 # Deploy
-# if [[ "$STAGE" == "All" || "$STAGE" == "Deploy" ]]; then
-#     case $OS in
-#         "Linux")
-#             cp $PROJECT_DIR/android/res/drawable/icon.png $BUILD_DIR/$PROJECT_NAME.png
-#             cd $BUILD_DIR
-#             export QMAKE=$Qt6_DIR/bin/qmake
-#             linuxdeploy-x86_64.AppImage \
-#                 --appdir ./$PROJECT_NAME.dir \
-#                 --executable ./$PROJECT_NAME \
-#                 --icon-file ./$PROJECT_NAME.png \
-#                 --create-desktop-file \
-#                 --output appimage \
-#                 --plugin qt
-#             ;;
-#         "Windows")
-#             mkdir $BUILD_DIR/$PROJECT_NAME/
-#             cp $BUILD_DIR/$PROJECT_NAME.exe $BUILD_DIR/$PROJECT_NAME/
-#             windeployqt $BUILD_DIR/$PROJECT_NAME/$PROJECT_NAME.exe
-#             tar -cjvf $BUILD_DIR/$PROJECT_NAME.tar.bz2 $BUILD_DIR/$PROJECT_NAME
-#             ls -al $BUILD_DIR/
-#             ;;
-#         "Android")
-#             set +x
-#                 if [ ! -n "$ANDROID_KEYSTORE_FILE" ]; then
-#                     export ANDROID_KEYSTORE_FILE=~/.android/debug.keystore
-#                     export ANDROID_KEYSTORE_PASS="android"
-#                     export ANDROID_KEYALIAS=androiddebugkey
-#                     export ANDROID_KEYALIAS_PASS="android"
-#                 fi
+if [[ "$STAGE" == "All" || "$STAGE" == "Deploy" ]]; then
+    case $OS in
+        "Linux")
+            # cp $PROJECT_DIR/android/res/drawable/icon.png $BUILD_DIR/$PROJECT_NAME.png
+            # export QMAKE=$QT_HOST_PATH/bin/qmake
+            # cd $BUILD_DIR
+            # # linuxdeploy-x86_64.AppImage \
+            # #     --appdir ./$PROJECT_NAME.AppDir \
+            # #     --executable ./$PROJECT_NAME \
+            # #     --icon-file ./$PROJECT_NAME.png \
+            # #     --exclude-library "libqtiff.so*" \
+            # #     --create-desktop-file \
+            # #     --output appimage \
+            # #     --plugin qt
+            # # ;;
+            # rm -rf ./$PROJECT_NAME.AppDir ./${PROJECT_NAME}-x86_64.AppImage
 
-#                 # Apk sign
-#                 apksigner sign \
-#                     --ks $ANDROID_KEYSTORE_FILE \
-#                     --ks-pass pass:$ANDROID_KEYSTORE_PASS \
-#                     --ks-key-alias $ANDROID_KEYALIAS \
-#                     --key-pass pass:$ANDROID_KEYALIAS_PASS \
-#                     $BUILD_DIR/android-build/$PROJECT_NAME.apk
+            # linuxdeploy-x86_64.AppImage \
+            #     --appdir ./$PROJECT_NAME.AppDir \
+            #     --executable ./$PROJECT_NAME \
+            #     --icon-file ./$PROJECT_NAME.png \
+            #     --create-desktop-file
 
-#                 # Android App Bundle create and sign
-#                 if [[ "$BUILD_TYPE" == "Release" ]]; then
-#                     androiddeployqt \
-#                         --input $BUILD_DIR/android-$PROJECT_NAME-deployment-settings.json \
-#                         --output $BUILD_DIR/android-build/ \
-#                         --aab \
-#                         --sign $ANDROID_KEYSTORE_FILE $ANDROID_KEYALIAS \
-#                         --storepass $ANDROID_KEYSTORE_PASS \
-#                         --keypass $ANDROID_KEYALIAS_PASS
-#                     jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 \
-#                         $BUILD_DIR/android-build/build/outputs/bundle/release/android-build-release.aab \
-#                         -keystore $ANDROID_KEYSTORE_FILE \
-#                         -storepass $ANDROID_KEYSTORE_PASS $ANDROID_KEYALIAS \
-#                         -keypass $ANDROID_KEYALIAS_PASS
-#                 fi
-#             set -x
+            # linuxdeploy-plugin-qt-x86_64.AppImage \
+            #     --appdir ./$PROJECT_NAME.AppDir \
+            #     --exclude-library "libqtiff.so*"
 
-#             if [ -n "$ANDROID_DEVICE" ]; then
-#                 adb -s $ANDROID_DEVICE install $BUILD_DIR/android-build/$PROJECT_NAME.apk
-#             fi
-#             ;;
-#     esac
-# fi
+            # linuxdeploy-x86_64.AppImage \
+            #     --appdir ./$PROJECT_NAME.AppDir \
+            #     --output appimage
+
+            # cd $BUILD_DIR
+            cmake --install $BUILD_DIR --prefix $BUILD_DIR/install_dir
+            cd $BUILD_DIR
+            cpack
+
+            ;;
+
+        # "Windows")
+        #     mkdir $BUILD_DIR/$PROJECT_NAME/
+        #     cp $BUILD_DIR/$PROJECT_NAME.exe $BUILD_DIR/$PROJECT_NAME/
+        #     windeployqt $BUILD_DIR/$PROJECT_NAME/$PROJECT_NAME.exe
+        #     tar -cjvf $BUILD_DIR/$PROJECT_NAME.tar.bz2 $BUILD_DIR/$PROJECT_NAME
+        #     ls -al $BUILD_DIR/
+        #     ;;
+        # "Android")
+        #     set +x
+        #         if [ ! -n "$ANDROID_KEYSTORE_FILE" ]; then
+        #             export ANDROID_KEYSTORE_FILE=~/.android/debug.keystore
+        #             export ANDROID_KEYSTORE_PASS="android"
+        #             export ANDROID_KEYALIAS=androiddebugkey
+        #             export ANDROID_KEYALIAS_PASS="android"
+        #         fi
+
+        #         # Apk sign
+        #         apksigner sign \
+        #             --ks $ANDROID_KEYSTORE_FILE \
+        #             --ks-pass pass:$ANDROID_KEYSTORE_PASS \
+        #             --ks-key-alias $ANDROID_KEYALIAS \
+        #             --key-pass pass:$ANDROID_KEYALIAS_PASS \
+        #             $BUILD_DIR/android-build/$PROJECT_NAME.apk
+
+        #         # Android App Bundle create and sign
+        #         if [[ "$BUILD_TYPE" == "Release" ]]; then
+        #             androiddeployqt \
+        #                 --input $BUILD_DIR/android-$PROJECT_NAME-deployment-settings.json \
+        #                 --output $BUILD_DIR/android-build/ \
+        #                 --aab \
+        #                 --sign $ANDROID_KEYSTORE_FILE $ANDROID_KEYALIAS \
+        #                 --storepass $ANDROID_KEYSTORE_PASS \
+        #                 --keypass $ANDROID_KEYALIAS_PASS
+        #             jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 \
+        #                 $BUILD_DIR/android-build/build/outputs/bundle/release/android-build-release.aab \
+        #                 -keystore $ANDROID_KEYSTORE_FILE \
+        #                 -storepass $ANDROID_KEYSTORE_PASS $ANDROID_KEYALIAS \
+        #                 -keypass $ANDROID_KEYALIAS_PASS
+        #         fi
+        #     set -x
+
+        #     if [ -n "$ANDROID_DEVICE" ]; then
+        #         adb -s $ANDROID_DEVICE install $BUILD_DIR/android-build/$PROJECT_NAME.apk
+        #     fi
+        #     ;;
+    esac
+fi

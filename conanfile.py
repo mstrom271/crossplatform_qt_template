@@ -12,7 +12,8 @@ class Recipe(ConanFile):
     def build_requirements(self):
         self.tool_requires("cmake/3.26.4")
         self.tool_requires("ninja/1.11.1")
-        self.tool_requires("openjdk/21.0.2")
+        if str(self.settings.get_safe("os", "")).lower() == "android":
+            self.tool_requires("openjdk/21.0.2")
 
     def generate(self):
         toolchain = CMakeToolchain(self)

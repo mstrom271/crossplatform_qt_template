@@ -10,6 +10,8 @@ set(ANDROID_PROJECT_NAME "$ENV{ANDROID_PROJECT_NAME}" CACHE STRING "ANDROID_PROJ
 
 project("${PROJECT_NAME}" VERSION "${PROJECT_VERSION}" LANGUAGES CXX)
 
+set(CMAKE_INSTALL_RPATH "$ORIGIN/../${CMAKE_INSTALL_LIBDIR}")
+
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -44,3 +46,55 @@ if (ANDROID)
 endif()
 
 qt_finalize_executable("${PROJECT_NAME}")
+
+# ---------------- INSTALL ----------------
+install(TARGETS "${PROJECT_NAME}"
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
+
+qt_generate_deploy_app_script(
+    TARGET "${PROJECT_NAME}"
+    OUTPUT_SCRIPT deploy_script
+    NO_TRANSLATIONS     # ?
+)
+install(SCRIPT ${deploy_script})
+
+# ---------------- CPACK ----------------
+set(CPACK_PACKAGE_NAME "${PROJECT_NAME}")
+set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION}")
+# set(CPACK_PACKAGE_VENDOR "")
+# set(CPACK_PACKAGE_CONTACT "")
+# CPACK_PACKAGE_DESCRIPTION_SUMMARY
+# CPACK_DEBIAN_PACKAGE_SECTION
+# CPACK_DEBIAN_PACKAGE_DEPENDS
+# CPACK_RESOURCE_FILE_LICENSE
+
+# package name: <project>-<os>-<arch>
+string(TOLOWER "${CMAKE_SYSTEM_NAME}" CPACK_TARGET_OS)
+string(TOLOWER "${CMAKE_SYSTEM_PROCESSOR}" CPACK_TARGET_ARCH)
+set(CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}-${CPACK_TARGET_OS}-${CPACK_TARGET_ARCH}")
+
+# Общая структура пакета
+set(CPACK_PACKAGE_INSTALL_DIRECTORY "${PROJECT_NAME}")
+
+# ---------- Platform dependend generators ----------
+
+if(WIN32)
+    set(CPACK_GENERATOR "NSIS")         # Windows .exe installer (NSIS)
+    set(CPACK_NSIS_DISPLAY_NAME "${PROJECT_NAME}")
+    set(CPACK_NSIS_PACKAGE_NAME "${PROJECT_NAME}")
+endif()
+
+if(APPLE)
+    set(CPACK_GENERATOR "DragNDrop")    # macOS .dmg
+endif()
+
+if(UNIX AND NOT APPLE)
+    set(CPACK_GENERATOR "DEB;TGZ")
+    set(CPACK_PACKAGING_INSTALL_PREFIX "/opt/${PROJECT_NAME}")
+    set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Your Name")
+    set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS OFF)
+endif()
+
+
+include(CPack)

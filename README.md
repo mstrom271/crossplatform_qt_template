@@ -8,6 +8,7 @@ Qt, Conan, Android NDK, [linuxdeploy](https://github.com/linuxdeploy/linuxdeploy
 ### Script invoke examples: ###
 ```bash
 ./scripts/build.sh \
+    CMAKE_PREFIX_PATH=/opt/Qt/6.10.2/gcc_64 \
     QT_HOST_PATH=/opt/Qt/6.10.2/gcc_64 \
     OS=Linux \
     ABI=x86_64 \
@@ -46,6 +47,6 @@ ANDROID_SDK_ROOT=/opt/android-sdk/
 ANDROID_NDK=/opt/android-sdk/ndk/29.0.14206865
 
 API_LEVEL=35
-ANDROID_DEVICE=28ff7904 # or 192.168.1.38:5555
+ANDROID_DEVICE=P7CIRKUWBMW45XFA # or 192.168.1.39:43491
 ANDROID_KEYSTORE_FILE=/path/to/sign.keystore
 ```
