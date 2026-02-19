@@ -16,8 +16,12 @@ do
 done
 
 # Read variables from src/config.h
-$PROJECT_DIR/scripts/build_number.sh
 source $PROJECT_DIR/scripts/config.h.sh $PROJECT_DIR/src/config.h
+
+# Build number as seconds since 2024-01-01 00:00:00 UTC
+EPOCH_UTC=1704067200
+NOW_UTC=$(date -u +%s)
+export BUILD_NUMBER=$((NOW_UTC - EPOCH_UTC))
 
 # create build dir
 BUILD_DIR=$PROJECT_DIR/build/$OS/$ABI/$BUILD_TYPE
