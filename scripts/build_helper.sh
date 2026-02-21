@@ -18,9 +18,9 @@ choice=$(echo -e \
 Qt6_MAIN=/opt/Qt/6.10.2
 export QT_HOST_PATH=$Qt6_MAIN/gcc_64
 export ANDROID_SDK_ROOT=/opt/android-sdk
-export ANDROID_NDK=/opt/android-sdk/ndk/29.0.14206865
+export ANDROID_NDK=$ANDROID_SDK_ROOT/ndk/29.0.14206865
 export API_LEVEL=35
-export ANDROID_DEVICE=192.168.1.39:5555 # 28ff7904
+export ANDROID_DEVICE=192.168.1.39:43491 # P7CIRKUWBMW45XFA
 
 export ANDROID_KEYSTORE_FILE=~/.android/debug.keystore
 export ANDROID_KEYSTORE_PASS="android"

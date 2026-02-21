@@ -20,6 +20,21 @@ class Recipe(ConanFile):
         os_name = str(self.settings.get_safe("os", "unknown")).lower()
         arch = str(self.settings.get_safe("arch", "unknown")).lower()
         toolchain.presets_prefix = f"{os_name}-{arch}"
+
+        # add cmake cached variables to get CLI/IDE uniform behaviour
+        for name in [
+            "PROJECT_NAME",
+            "PROJECT_VERSION",
+            "PROJECT_LABEL",
+            "BUILD_NUMBER",
+            "ANDROID_SDK_ROOT",
+            "ANDROID_NDK",
+            "ANDROID_PROJECT_NAME",
+        ]:
+            value = os.getenv(name)
+            if value:
+                toolchain.cache_variables[name] = value
+
         toolchain.generate()
 
         deps = CMakeDeps(self)

@@ -38,7 +38,7 @@ $PROJECT_DIR/rcc/rcc.sh
 
 # Config
 if [[ "$STAGE" == "All" || "$STAGE" == "Config" ]]; then
-    rm -rf $BUILD_DIR/* # $PROJECT_DIR/CMakePresets.json $PROJECT_DIR/CMakeUserPresets.json
+    rm -rf $BUILD_DIR/*
 
     conan profile detect -f
     case $OS in
