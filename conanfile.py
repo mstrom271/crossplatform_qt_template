@@ -41,7 +41,25 @@ class Recipe(ConanFile):
         deps.generate()
 
     def layout(self):
-        # cmake_layout(self)
-        self.folders.source = "."
-        self.folders.build = "."
+        self.folders.source = "./"
+        self.folders.build = "./"
         self.folders.generators = "./generators"
+
+    def build(self):
+        target = self.conf.get("user.step:target", default="build")
+        self.output.info(f"user.step:target={target}")
+        cmake = CMake(self)
+
+        match target:
+            case "configure":
+                self.run("bash ./scripts/translations.sh", cwd=self.recipe_folder)
+                self.run("bash ./rcc/rcc.sh", cwd=self.recipe_folder)
+                cmake.configure()
+            case "build":
+                cmake.build()
+            case "package":
+                self.run("bash ./scripts/package.sh", cwd=self.recipe_folder)
+            case "deploy":
+                self.run("bash ./scripts/deploy.sh", cwd=self.recipe_folder)
+            case _:
+                self.output.warning(f"Unknown user.step:target '{target}', no action executed")
