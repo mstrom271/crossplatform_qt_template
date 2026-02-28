@@ -9,29 +9,19 @@ env:
   ANDROID_NDK_VERSION: 'r29'
   ANDROID_API_LEVEL: '35'
 
-x-action-refs:
-  setup_ndk: &setup_ndk nttld/setup-ndk@v1.5.0
-  install_qt: &install_qt jurplel/install-qt-action@v4.3.0
-  get_conan: &get_conan turtlebrowser/get-conan@main
-  checkout: &checkout actions/checkout@v6
-  upload_artifact: &upload_artifact actions/upload-artifact@v6
-  install_linuxdeploy: &install_linuxdeploy miurahr/install-linuxdeploy-action@v1.8.0
-  download_artifact: &download_artifact actions/download-artifact@v7
-  release_action: &release_action ncipollo/release-action@v1
-
 jobs:
   build_android:
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
-      - uses: *setup_ndk
+      - uses: nttld/setup-ndk@v1.5.0
         with:
           ndk-version: ${{ env.ANDROID_NDK_VERSION }}
           add-to-path: true
           local-cache: true
       - name: Install Qt (Host)
-        uses: *install_qt
+        uses: jurplel/install-qt-action@v4.3.0
         with:
           aqtversion: ${{ env.AQT_VERSION }}
           version: ${{ env.QT_VERSION }}
@@ -41,7 +31,7 @@ jobs:
           cache: 'true'
           cache-key-prefix: 'install-qt-action'
       - name: Install Qt (android_arm64_v8a)
-        uses: *install_qt
+        uses: jurplel/install-qt-action@v4.3.0
         with:
           aqtversion: ${{ env.AQT_VERSION }}
           version: ${{ env.QT_VERSION }}
@@ -51,7 +41,7 @@ jobs:
           cache: 'true'
           cache-key-prefix: 'install-qt-action'
       - name: Install Qt (android_x86_64)
-        uses: *install_qt
+        uses: jurplel/install-qt-action@v4.3.0
         with:
           aqtversion: ${{ env.AQT_VERSION }}
           version: ${{ env.QT_VERSION }}
@@ -62,9 +52,9 @@ jobs:
           cache-key-prefix: 'install-qt-action'
       - name: Install Conan
         id: conan
-        uses: *get_conan
+        uses: turtlebrowser/get-conan@main
       - name: Checkout
-        uses: *checkout
+        uses: actions/checkout@v6
       - name: Build
         id: build
         shell: bash
@@ -95,12 +85,12 @@ jobs:
           ./scripts/build_helper.sh "Release_Android_x86_64(Configure,Build,Package)"
           echo "artifact_android_x86_64_apk=${ARTIFACT_DIR}/${ARTIFACT_NAME}.apk" >> "$GITHUB_OUTPUT"
       - name: Upload artifact_android_armv8_apk
-        uses: *upload_artifact
+        uses: actions/upload-artifact@v6
         with:
           name: artifact_android_armv8_apk
           path: ${{ steps.build.outputs.artifact_android_armv8_apk }}
       - name: Upload artifact_android_x86_64_apk
-        uses: *upload_artifact
+        uses: actions/upload-artifact@v6
         with:
           name: artifact_android_x86_64_apk
           path: ${{ steps.build.outputs.artifact_android_x86_64_apk }}
@@ -111,7 +101,7 @@ jobs:
       contents: write
     steps:
       - name: Install Qt
-        uses: *install_qt
+        uses: jurplel/install-qt-action@v4.3.0
         with:
           aqtversion: ${{ env.AQT_VERSION }}
           version: ${{ env.QT_VERSION }}
@@ -122,10 +112,11 @@ jobs:
           cache-key-prefix: 'install-qt-action'
       - name: Install Conan
         id: conan
-        uses: *get_conan
+        uses: turtlebrowser/get-conan@main
       - name: Checkout
-        uses: *checkout
+        uses: actions/checkout@v6
       - name: Build
+        id: build
         shell: bash
         run: |
           env && echo "-----------------------------"
@@ -133,7 +124,7 @@ jobs:
           ./scripts/build_helper.sh "Release_Windows(Configure,Build,Package)"
           echo "artifact_windows_x86_64_tar_bz2=${ARTIFACT_DIR}/${ARTIFACT_NAME}.tar.bz2" >> "$GITHUB_OUTPUT"
       - name: Upload artifact_windows_x86_64_tar_bz2
-        uses: *upload_artifact
+        uses: actions/upload-artifact@v6
         with:
           name: artifact_windows_x86_64_tar_bz2
           path: ${{ steps.build.outputs.artifact_windows_x86_64_tar_bz2 }}
@@ -144,7 +135,7 @@ jobs:
       contents: write
     steps:
       - name: Install Qt
-        uses: *install_qt
+        uses: jurplel/install-qt-action@v4.3.0
         with:
           aqtversion: ${{ env.AQT_VERSION }}
           version: ${{ env.QT_VERSION }}
@@ -155,16 +146,17 @@ jobs:
           cache-key-prefix: 'install-qt-action'
       - name: Install Conan
         id: conan
-        uses: *get_conan
+        uses: turtlebrowser/get-conan@main
       - name: Install LinuxDeploy
-        uses: *install_linuxdeploy
+        uses: miurahr/install-linuxdeploy-action@v1.8.0
         with:
           plugins: qt appimage
       - name: install dependencies
         run: sudo apt-get update && sudo apt-get install -y libfuse2
       - name: Checkout
-        uses: *checkout
+        uses: actions/checkout@v6
       - name: Build
+        id: build
         shell: bash
         run: |
           env && echo "-----------------------------"
@@ -174,17 +166,17 @@ jobs:
           echo "artifact_linux_x86_64_tar_gz=${ARTIFACT_DIR}/${ARTIFACT_NAME}.tar.gz" >> "$GITHUB_OUTPUT"
           echo "artifact_linux_x86_64_AppImage=${ARTIFACT_DIR}/${ARTIFACT_NAME}.AppImage" >> "$GITHUB_OUTPUT"
       - name: Upload artifact_linux_x86_64_deb
-        uses: *upload_artifact
+        uses: actions/upload-artifact@v6
         with:
           name: artifact_linux_x86_64_deb
           path: ${{ steps.build.outputs.artifact_linux_x86_64_deb }}
       - name: Upload artifact_linux_x86_64_tar_gz
-        uses: *upload_artifact
+        uses: actions/upload-artifact@v6
         with:
           name: artifact_linux_x86_64_tar_gz
           path: ${{ steps.build.outputs.artifact_linux_x86_64_tar_gz }}
       - name: Upload artifact_linux_x86_64_AppImage
-        uses: *upload_artifact
+        uses: actions/upload-artifact@v6
         with:
           name: artifact_linux_x86_64_AppImage
           path: ${{ steps.build.outputs.artifact_linux_x86_64_AppImage }}
@@ -196,32 +188,32 @@ jobs:
       contents: write
     steps:
       - name: Download artifact_android_armv8_apk
-        uses: *download_artifact
+        uses: actions/download-artifact@v7
         with:
           name: artifact_android_armv8_apk
           path: ./artifact
       - name: Download artifact_android_x86_64_apk
-        uses: *download_artifact
+        uses: actions/download-artifact@v7
         with:
           name: artifact_android_x86_64_apk
           path: ./artifact
       - name: Download artifact_windows_x86_64_tar_bz2
-        uses: *download_artifact
+        uses: actions/download-artifact@v7
         with:
           name: artifact_windows_x86_64_tar_bz2
           path: ./artifact
       - name: Download artifact_linux_x86_64_deb
-        uses: *download_artifact
+        uses: actions/download-artifact@v7
         with:
           name: artifact_linux_x86_64_deb
           path: ./artifact
       - name: Download artifact_linux_x86_64_tar_gz
-        uses: *download_artifact
+        uses: actions/download-artifact@v7
         with:
           name: artifact_linux_x86_64_tar_gz
           path: ./artifact
       - name: Download artifact_linux_x86_64_AppImage
-        uses: *download_artifact
+        uses: actions/download-artifact@v7
         with:
           name: artifact_linux_x86_64_AppImage
           path: ./artifact
@@ -230,7 +222,7 @@ jobs:
         run: |
           ls -R
       - name: Release
-        uses: *release_action
+        uses: ncipollo/release-action@v1
         if: startsWith(github.ref, 'refs/tags/v')
         with:
           artifacts: "./artifact/*"
