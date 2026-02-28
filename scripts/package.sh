@@ -45,14 +45,20 @@ case $OS in
         ;;
 
     "Windows")
-        mkdir $BUILD_DIR/$PROJECT_NAME/
-        cp $BUILD_DIR/$PROJECT_NAME.exe $BUILD_DIR/$PROJECT_NAME/
-        $QT_HOST_PATH/bin/windeployqt $BUILD_DIR/$PROJECT_NAME/$PROJECT_NAME.exe
-        tar -cjvf $BUILD_DIR/$PROJECT_NAME.tar.bz2 $BUILD_DIR/$PROJECT_NAME
+        # mkdir $BUILD_DIR/$PROJECT_NAME/
+        # cp $BUILD_DIR/$PROJECT_NAME.exe $BUILD_DIR/$PROJECT_NAME/
+        # $QT_HOST_PATH/bin/windeployqt $BUILD_DIR/$PROJECT_NAME/$PROJECT_NAME.exe
+        # tar -cjvf $BUILD_DIR/$PROJECT_NAME.tar.bz2 $BUILD_DIR/$PROJECT_NAME
+        cmake --install $BUILD_DIR --prefix "$(realpath "$BUILD_DIR/install_dir")"
+        CPACK_OUT_DIR="$BUILD_DIR/cpack_out"
+        rm -rf "$CPACK_OUT_DIR"
+        mkdir -p "$CPACK_OUT_DIR"
+        cpack --config "$BUILD_DIR/CPackConfig.cmake" -B "$CPACK_OUT_DIR"
 
         # move to $ARTIFACT_DIR
-        mv "${BUILD_DIR}/${PROJECT_NAME}.tar.bz2" "${ARTIFACT_DIR}/${ARTIFACT_NAME}.tar.bz2"
-
+        # mv "${BUILD_DIR}/${PROJECT_NAME}.tar.bz2" "${ARTIFACT_DIR}/${ARTIFACT_NAME}.tar.bz2"
+        mv "${CPACK_OUT_DIR}/${PROJECT_NAME}.exe" "${ARTIFACT_DIR}/${ARTIFACT_NAME}.exe"
+        mv "${CPACK_OUT_DIR}/${PROJECT_NAME}.zip" "${ARTIFACT_DIR}/${ARTIFACT_NAME}.zip"
         ;;
     "Android")
         set +x

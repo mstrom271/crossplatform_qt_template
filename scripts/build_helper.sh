@@ -28,11 +28,10 @@ else
 fi
 
 # Environment variables
-Qt6_MAIN="${Qt6_MAIN:-/opt/Qt/6.10.2}"
+export Qt6_MAIN="${Qt6_MAIN:-/opt/Qt/6.10.2}"
 export ANDROID_SDK_ROOT="${ANDROID_SDK_ROOT:-/opt/android-sdk}"
 export ANDROID_NDK="${ANDROID_NDK:-$ANDROID_SDK_ROOT/ndk/29.0.14206865}"
 export API_LEVEL=35
-export QT_HOST_PATH=$Qt6_MAIN/gcc_64
 export ANDROID_DEVICE=P7CIRKUWBMW45XFA      # or ip:port
 
 case $choice in
@@ -41,6 +40,7 @@ case $choice in
         export ABI=x86_64
         export BUILD_TYPE=Debug
         export STAGES=Configure
+        export QT_HOST_PATH=$Qt6_MAIN/gcc_64
         export CMAKE_PREFIX_PATH=$Qt6_MAIN/gcc_64
         ;;
     "Debug_Windows(Configure)")
@@ -48,13 +48,15 @@ case $choice in
         export ABI=x86_64
         export BUILD_TYPE=Debug
         export STAGES=Configure
-        export CMAKE_PREFIX_PATH=$Qt6_MAIN/mingw_64
+        export QT_HOST_PATH=$Qt6_MAIN/msvc2022_64
+        export CMAKE_PREFIX_PATH=$Qt6_MAIN/msvc2022_64
         ;;
     "Debug_Android(Configure)")
         export OS=Android
         export ABI=armv8
         export BUILD_TYPE=Debug
         export STAGES=Configure
+        export QT_HOST_PATH=$Qt6_MAIN/gcc_64
         export CMAKE_PREFIX_PATH=$Qt6_MAIN/android_arm64_v8a
         ;;
     "Debug_Android(Configure,Build,Package,Deploy)")
@@ -62,6 +64,7 @@ case $choice in
         export ABI=armv8
         export BUILD_TYPE=Debug
         export STAGES=Configure,Build,Package,Deploy
+        export QT_HOST_PATH=$Qt6_MAIN/gcc_64
         export CMAKE_PREFIX_PATH=$Qt6_MAIN/android_arm64_v8a
         ;;
     "Release_Linux(Configure,Build,Package)")
@@ -69,6 +72,7 @@ case $choice in
         export ABI=x86_64
         export BUILD_TYPE=Release
         export STAGES=Configure,Build,Package
+        export QT_HOST_PATH=$Qt6_MAIN/gcc_64
         export CMAKE_PREFIX_PATH=$Qt6_MAIN/gcc_64
         ;;
     "Release_Windows(Configure,Build,Package)")
@@ -76,7 +80,8 @@ case $choice in
         export ABI=x86_64
         export BUILD_TYPE=Release
         export STAGES=Configure,Build,Package
-        export CMAKE_PREFIX_PATH=$Qt6_MAIN/mingw_64
+        export QT_HOST_PATH=$Qt6_MAIN/msvc2022_64
+        export CMAKE_PREFIX_PATH=$Qt6_MAIN/msvc2022_64
         ;;
     "Release_Android_armv8(Configure,Build,Package)")
         if [[ -z "${ANDROID_KEYSTORE_FILE:-}" ]]; then
@@ -90,6 +95,7 @@ case $choice in
         export ABI=armv8
         export BUILD_TYPE=Release
         export STAGES=Configure,Build,Package
+        export QT_HOST_PATH=$Qt6_MAIN/gcc_64
         export CMAKE_PREFIX_PATH=$Qt6_MAIN/android_arm64_v8a
         ;;
     "Release_Android_x86_64(Configure,Build,Package)")
@@ -104,6 +110,7 @@ case $choice in
         export ABI=x86_64
         export BUILD_TYPE=Release
         export STAGES=Configure,Build,Package
+        export QT_HOST_PATH=$Qt6_MAIN/gcc_64
         export CMAKE_PREFIX_PATH=$Qt6_MAIN/android_x86_64
         ;;
     *)

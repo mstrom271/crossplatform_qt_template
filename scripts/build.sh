@@ -40,10 +40,10 @@ case $OS in
     "Linux")
         ;;
     "Windows")
-        CONAN_COMMON_ARGS+=(
-            -c tools.microsoft.bash:subsystem=msys2 \
-            -c tools.microsoft.bash:active=True \
-        )
+        # CONAN_COMMON_ARGS+=(
+        #     -c tools.microsoft.bash:subsystem=msys2 \
+        #     -c tools.microsoft.bash:active=True \
+        # )
         ;;
     "Android")
         CONAN_COMMON_ARGS+=(

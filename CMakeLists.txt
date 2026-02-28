@@ -25,7 +25,7 @@ target_compile_features("${PROJECT_NAME}" PRIVATE cxx_std_20)
 target_link_libraries("${PROJECT_NAME}" PRIVATE Qt6::Widgets)
 
 if(MSVC)
-    target_compile_options("${PROJECT_NAME}" PRIVATE /W4)
+    target_compile_options("${PROJECT_NAME}" PRIVATE /W4 /Zc:__cplusplus)
 else()
     target_compile_options("${PROJECT_NAME}" PRIVATE -Wall -Wextra -Wpedantic)
 endif()
@@ -72,7 +72,8 @@ if(NOT ANDROID AND NOT IOS)
     # ---------- Platform dependend generators ----------
 
     if(WIN32)
-        set(CPACK_GENERATOR "NSIS")         # Windows .exe installer (NSIS)
+        include(InstallRequiredSystemLibraries)
+        set(CPACK_GENERATOR "NSIS;ZIP")         # Windows .exe installer (NSIS)
         set(CPACK_NSIS_DISPLAY_NAME "${PROJECT_NAME}")
         set(CPACK_NSIS_PACKAGE_NAME "${PROJECT_NAME}")
     endif()

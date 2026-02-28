@@ -27,7 +27,7 @@ jobs:
           version: ${{ env.QT_VERSION }}
           host: 'linux'
           target: 'desktop'
-          arch: 'gcc_64'
+          arch: 'linux_gcc_64'
           cache: 'true'
           cache-key-prefix: 'install-qt-action'
       - name: Install Qt (android_arm64_v8a)
@@ -79,21 +79,19 @@ jobs:
             export ANDROID_KEYSTORE_FILE="$KEYSTORE_FILE"
           set -x
 
-          ./scripts/build_helper.sh "Release_Android_armv8(Configure,Build,Package)"
-          echo "artifact_android_armv8_apk=${ARTIFACT_DIR}/${ARTIFACT_NAME}.apk" >> "$GITHUB_OUTPUT"
+          export Qt6_MAIN=${QT_ROOT_DIR}/..
+          export ANDROID_SDK_ROOT=$ANDROID_HOME
+          export ANDROID_NDK=$ANDROID_NDK_LATEST_HOME
 
+          ./scripts/build_helper.sh "Release_Android_armv8(Configure,Build,Package)"
           ./scripts/build_helper.sh "Release_Android_x86_64(Configure,Build,Package)"
-          echo "artifact_android_x86_64_apk=${ARTIFACT_DIR}/${ARTIFACT_NAME}.apk" >> "$GITHUB_OUTPUT"
-      - name: Upload artifact_android_armv8_apk
+      - name: Upload artifact_android
         uses: actions/upload-artifact@v6
         with:
-          name: artifact_android_armv8_apk
-          path: ${{ steps.build.outputs.artifact_android_armv8_apk }}
-      - name: Upload artifact_android_x86_64_apk
-        uses: actions/upload-artifact@v6
-        with:
-          name: artifact_android_x86_64_apk
-          path: ${{ steps.build.outputs.artifact_android_x86_64_apk }}
+          name: artifact_android
+          path: |
+            ./build/*/artifact/*.apk
+          if-no-files-found: error
 
   build_windows:
     runs-on: windows-latest
@@ -107,12 +105,18 @@ jobs:
           version: ${{ env.QT_VERSION }}
           host: 'windows'
           target: 'desktop'
-          arch: 'win64_mingw'
+          arch: 'win64_msvc2022_64'
           cache: 'true'
           cache-key-prefix: 'install-qt-action'
       - name: Install Conan
         id: conan
         uses: turtlebrowser/get-conan@main
+      - name: Install NSIS
+        shell: bash
+        run: |
+          choco install nsis -y --no-progress
+          echo 'C:\Program Files (x86)\NSIS' >> "$GITHUB_PATH"
+          "/c/Program Files (x86)/NSIS/makensis.exe" -VERSION
       - name: Checkout
         uses: actions/checkout@v6
       - name: Build
@@ -121,13 +125,17 @@ jobs:
         run: |
           env && echo "-----------------------------"
 
+          export Qt6_MAIN=${QT_ROOT_DIR}/..
+
           ./scripts/build_helper.sh "Release_Windows(Configure,Build,Package)"
-          echo "artifact_windows_x86_64_tar_bz2=${ARTIFACT_DIR}/${ARTIFACT_NAME}.tar.bz2" >> "$GITHUB_OUTPUT"
-      - name: Upload artifact_windows_x86_64_tar_bz2
+      - name: Upload artifact_windows
         uses: actions/upload-artifact@v6
         with:
-          name: artifact_windows_x86_64_tar_bz2
-          path: ${{ steps.build.outputs.artifact_windows_x86_64_tar_bz2 }}
+          name: artifact_windows
+          path: |
+            ./build/*/artifact/*.exe
+            ./build/*/artifact/*.zip
+          if-no-files-found: error
 
   build_linux:
     runs-on: ubuntu-latest
@@ -141,7 +149,7 @@ jobs:
           version: ${{ env.QT_VERSION }}
           host: 'linux'
           target: 'desktop'
-          arch: 'gcc_64'
+          arch: 'linux_gcc_64'
           cache: 'true'
           cache-key-prefix: 'install-qt-action'
       - name: Install Conan
@@ -161,25 +169,18 @@ jobs:
         run: |
           env && echo "-----------------------------"
 
+          export Qt6_MAIN=${QT_ROOT_DIR}/..
+
           ./scripts/build_helper.sh "Release_Linux(Configure,Build,Package)"
-          echo "artifact_linux_x86_64_deb=${ARTIFACT_DIR}/${ARTIFACT_NAME}.deb" >> "$GITHUB_OUTPUT"
-          echo "artifact_linux_x86_64_tar_gz=${ARTIFACT_DIR}/${ARTIFACT_NAME}.tar.gz" >> "$GITHUB_OUTPUT"
-          echo "artifact_linux_x86_64_AppImage=${ARTIFACT_DIR}/${ARTIFACT_NAME}.AppImage" >> "$GITHUB_OUTPUT"
-      - name: Upload artifact_linux_x86_64_deb
+      - name: Upload artifact_linux
         uses: actions/upload-artifact@v6
         with:
-          name: artifact_linux_x86_64_deb
-          path: ${{ steps.build.outputs.artifact_linux_x86_64_deb }}
-      - name: Upload artifact_linux_x86_64_tar_gz
-        uses: actions/upload-artifact@v6
-        with:
-          name: artifact_linux_x86_64_tar_gz
-          path: ${{ steps.build.outputs.artifact_linux_x86_64_tar_gz }}
-      - name: Upload artifact_linux_x86_64_AppImage
-        uses: actions/upload-artifact@v6
-        with:
-          name: artifact_linux_x86_64_AppImage
-          path: ${{ steps.build.outputs.artifact_linux_x86_64_AppImage }}
+          name: artifact_linux
+          path: |
+            ./build/*/artifact/*.deb
+            ./build/*/artifact/*.tar.gz
+            ./build/*/artifact/*.AppImage
+          if-no-files-found: error
 
   collect_artifacts:
     needs: [build_android, build_windows, build_linux]
@@ -187,35 +188,20 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Download artifact_android_armv8_apk
+      - name: Download artifact_android
         uses: actions/download-artifact@v7
         with:
-          name: artifact_android_armv8_apk
+          name: artifact_android
           path: ./artifact
-      - name: Download artifact_android_x86_64_apk
+      - name: Download artifact_windows
         uses: actions/download-artifact@v7
         with:
-          name: artifact_android_x86_64_apk
+          name: artifact_windows
           path: ./artifact
-      - name: Download artifact_windows_x86_64_tar_bz2
+      - name: Download artifact_linux
         uses: actions/download-artifact@v7
         with:
-          name: artifact_windows_x86_64_tar_bz2
-          path: ./artifact
-      - name: Download artifact_linux_x86_64_deb
-        uses: actions/download-artifact@v7
-        with:
-          name: artifact_linux_x86_64_deb
-          path: ./artifact
-      - name: Download artifact_linux_x86_64_tar_gz
-        uses: actions/download-artifact@v7
-        with:
-          name: artifact_linux_x86_64_tar_gz
-          path: ./artifact
-      - name: Download artifact_linux_x86_64_AppImage
-        uses: actions/download-artifact@v7
-        with:
-          name: artifact_linux_x86_64_AppImage
+          name: artifact_linux
           path: ./artifact
       - name: Prepare
         shell: bash
