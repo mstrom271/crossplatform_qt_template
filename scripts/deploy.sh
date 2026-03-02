@@ -9,6 +9,6 @@ case $OS in
         echo "No implementation"
         ;;
     "Android")
-        adb -s $ANDROID_DEVICE install $BUILD_DIR/package/$PROJECT_NAME.apk
+        adb -s $ANDROID_DEVICE install $BUILD_DIR/artifact/$PROJECT_NAME.apk
         ;;
 esac

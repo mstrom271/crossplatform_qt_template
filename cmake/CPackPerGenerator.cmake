@@ -1,7 +1,0 @@
-if(CPACK_GENERATOR STREQUAL "DEB")
-    set(CPACK_PACKAGING_INSTALL_PREFIX "/opt/${PROJECT_NAME}")
-    # include("${CMAKE_CURRENT_LIST_DIR}/CPackDeb.cmake")
-elseif(CPACK_GENERATOR STREQUAL "TGZ")
-    set(CPACK_PACKAGING_INSTALL_PREFIX "/")
-    # include("${CMAKE_CURRENT_LIST_DIR}/CPackTgz.cmake")
-endif()

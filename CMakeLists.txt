@@ -39,7 +39,7 @@ endif()
 
 qt_finalize_executable("${PROJECT_NAME}")
 
-# Desktop deployment
+# Desktop installer generation
 if(NOT ANDROID AND NOT IOS)
     # ---------------- INSTALL ----------------
     install(TARGETS "${PROJECT_NAME}"
@@ -56,39 +56,41 @@ if(NOT ANDROID AND NOT IOS)
     # ---------------- CPACK ----------------
     set(CPACK_PACKAGE_NAME "${PROJECT_NAME}")
     set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION}")
-    # set(CPACK_PACKAGE_VENDOR "TODO")
-    # set(CPACK_PACKAGE_CONTACT "TODO")
-    # CPACK_PACKAGE_DESCRIPTION_SUMMARY
-    # CPACK_DEBIAN_PACKAGE_SECTION
-    # CPACK_DEBIAN_PACKAGE_DEPENDS
-    # CPACK_RESOURCE_FILE_LICENSE
-
-    # package name: <project>
-    set(CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}")
-
-    # C:\Program Files\<PROJECT_NAME>
-    set(CPACK_PACKAGE_INSTALL_DIRECTORY "${PROJECT_NAME}")
+    set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "${PROJECT_DESCRIPTON}")
+    set(CPACK_PACKAGE_VENDOR "${ORGANIZATION_NAME}")
+    set(CPACK_PACKAGE_CONTACT "${ORGANIZATION_CONTACT}")
+    set(CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}")          # package name: <project>
+    set(CPACK_PACKAGE_INSTALL_DIRECTORY "${PROJECT_NAME}")  # C:\Program Files\<PROJECT_NAME>
 
     # ---------- Platform dependend generators ----------
 
     if(WIN32)
         include(InstallRequiredSystemLibraries)
-        set(CPACK_GENERATOR "NSIS;ZIP")         # Windows .exe installer (NSIS)
+        set(CPACK_GENERATOR "NSIS;ZIP")         # exe(NSIS) + zip
         set(CPACK_NSIS_DISPLAY_NAME "${PROJECT_NAME}")
         set(CPACK_NSIS_PACKAGE_NAME "${PROJECT_NAME}")
     endif()
 
     if(APPLE)
-        set(CPACK_GENERATOR "DragNDrop")    # macOS .dmg
+        set(CPACK_GENERATOR "DragNDrop")        # dmg
     endif()
 
     if(UNIX AND NOT APPLE)
-        set(CPACK_GENERATOR "DEB;TGZ")
+        set(CPACK_GENERATOR "DEB;TGZ")          # deb + tar.gz
         set(CPACK_DEBIAN_PACKAGE_MAINTAINER "TODO")
         set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS OFF)
-    endif()
 
-    set(CPACK_PROJECT_CONFIG_FILE "${CMAKE_SOURCE_DIR}/cmake/CPackPerGenerator.cmake")
+        # generate cpack instructions for deb + tar.gz
+        set(_cpack_per_generator_config "${CMAKE_CURRENT_BINARY_DIR}/CPackPerGenerator.cmake")
+        file(WRITE "${_cpack_per_generator_config}" [=[
+            if(CPACK_GENERATOR STREQUAL "DEB")
+                set(CPACK_PACKAGING_INSTALL_PREFIX "/opt/]=] "${PROJECT_NAME}" [=[")
+            elseif(CPACK_GENERATOR STREQUAL "TGZ")
+                set(CPACK_PACKAGING_INSTALL_PREFIX "/")
+            endif()
+            ]=])
+        set(CPACK_PROJECT_CONFIG_FILE "${_cpack_per_generator_config}")
+    endif()
 
     include(CPack)
 endif()

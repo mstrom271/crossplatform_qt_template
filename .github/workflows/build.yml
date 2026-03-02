@@ -64,8 +64,6 @@ jobs:
           ANDROID_KEYALIAS: ${{ secrets.ANDROID_KEYALIAS }}
           ANDROID_KEYALIAS_PASS: ${{ secrets.ANDROID_KEYALIAS_PASS }}
         run: |
-          env && echo "-----------------------------"
-
           set -euo pipefail
           set +x
             umask 077
@@ -123,8 +121,6 @@ jobs:
         id: build
         shell: bash
         run: |
-          env && echo "-----------------------------"
-
           export Qt6_MAIN=${QT_ROOT_DIR}/..
 
           ./scripts/build_helper.sh "Release_Windows(Configure,Build,Package)"
@@ -167,8 +163,6 @@ jobs:
         id: build
         shell: bash
         run: |
-          env && echo "-----------------------------"
-
           export Qt6_MAIN=${QT_ROOT_DIR}/..
 
           ./scripts/build_helper.sh "Release_Linux(Configure,Build,Package)"

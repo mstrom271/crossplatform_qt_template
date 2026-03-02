@@ -26,10 +26,13 @@ class Recipe(ConanFile):
             "PROJECT_NAME",
             "PROJECT_VERSION",
             "PROJECT_LABEL",
+            "PROJECT_DESCRIPTON",
+            "ORGANIZATION_NAME",
+            "ORGANIZATION_CONTACT",
             "BUILD_NUMBER",
+            "ANDROID_PROJECT_NAME",
             "ANDROID_SDK_ROOT",
             "ANDROID_NDK",
-            "ANDROID_PROJECT_NAME",
         ]:
             value = os.getenv(name)
             if value:
